@@ -28,14 +28,13 @@ namespace Furloader
     {
         static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\\FLDB.mdf;Integrated Security=True";
         SqlConnection cnn = new SqlConnection(connectionString);
-        private static int version = 3;
+        private static int version = 4;
         private static readonly object locker = new object();
 
 
         public DataHandler()
         {
         }
-
 
 
         public int bootDB()
@@ -81,6 +80,7 @@ namespace Furloader
             return dbVersion;
         }
 
+        // TODO: Update from sql files
         private int updateDB(int toDBver)
         {
             int result = 0;
@@ -105,6 +105,45 @@ namespace Furloader
                             result = 3;
                         }
                         break;
+                    case 4:
+                        {
+                            string str = "ALTER TABLE locations ALTER COLUMN source VARCHAR(255) NOT NULL; ";
+                            str += "ALTER TABLE locations ALTER COLUMN pagesource VARCHAR(255) NOT NULL; ";
+                            str += "ALTER TABLE locations ALTER COLUMN path VARCHAR(255) NOT NULL;";
+                            SqlCommand cmd = new SqlCommand(str, cnn);
+                            cmd.ExecuteNonQuery();
+
+                            removeWhitespace("locations", "source");
+                            removeWhitespace("locations", "pagesource");
+                            removeWhitespace("locations", "path");
+
+                            str = "ALTER TABLE logins ALTER COLUMN cookie VARCHAR(255); ";
+                            str += "ALTER TABLE logins ALTER COLUMN username VARCHAR(255); ";
+                            str += "ALTER TABLE logins ALTER COLUMN password VARCHAR(255);";
+                            cmd.CommandText = str;
+                            cmd.ExecuteNonQuery();
+
+                            removeWhitespace("logins", "cookie");
+                            removeWhitespace("logins", "username");
+                            removeWhitespace("logins", "password");
+
+
+                            str = "ALTER TABLE sites ALTER COLUMN site VARCHAR(255) NOT NULL";
+                            cmd.CommandText = str;
+                            cmd.ExecuteNonQuery();
+
+                            removeWhitespace("sites", "site");
+
+
+                            str = "ALTER TABLE watchlist ALTER COLUMN author VARCHAR(64)";
+                            cmd.CommandText = str;
+                            cmd.ExecuteNonQuery();
+
+                            removeWhitespace("watchlist", "author");
+
+                            result = 4;
+                        }
+                        break;
                     default:
                         result = 0;
                         break;
@@ -121,8 +160,23 @@ namespace Furloader
             return result;
         }
 
+        private void removeWhitespace(string table, string column)
+        {
+            try
+            {
+                string str = string.Format("UPDATE {0} SET {1} = RTRIM({1})", table, column);
+                SqlCommand cmd = new SqlCommand(str, cnn);
+                cmd.ExecuteNonQuery();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+
         private void initDB()
         {
+            // This is horrible!!
 
             /*  DB layout V2:
              *  TABLE       | COLUMN
