@@ -111,6 +111,7 @@ namespace Furloader
                             str += "ALTER TABLE locations ALTER COLUMN pagesource VARCHAR(255) NOT NULL; ";
                             str += "ALTER TABLE locations ALTER COLUMN path VARCHAR(255) NOT NULL;";
                             SqlCommand cmd = new SqlCommand(str, cnn);
+                            cmd.CommandTimeout = 0;
                             cmd.ExecuteNonQuery();
 
                             removeWhitespace("locations", "source");
