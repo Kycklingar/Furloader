@@ -147,7 +147,7 @@ namespace Furloader
                         break;
                     case 5:
                         {
-                            SqlCommand cmd = new SqlCommand("CREATE INDEX index_location ON locations(pagesource);");
+                            SqlCommand cmd = new SqlCommand("CREATE INDEX index_location ON locations(pagesource);", cnn);
                             cmd.ExecuteNonQuery();
                             result = 5;
                         }
