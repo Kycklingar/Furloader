@@ -28,7 +28,7 @@ namespace Furloader
     {
         static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\\FLDB.mdf;Integrated Security=True";
         SqlConnection cnn = new SqlConnection(connectionString);
-        private static int version = 4;
+        private static int version = 5;
         private static readonly object locker = new object();
 
 
@@ -143,6 +143,13 @@ namespace Furloader
                             removeWhitespace("watchlist", "author");
 
                             result = 4;
+                        }
+                        break;
+                    case 5:
+                        {
+                            SqlCommand cmd = new SqlCommand("CREATE INDEX index_location ON locations(pagesource);");
+                            cmd.ExecuteNonQuery();
+                            result = 5;
                         }
                         break;
                     default:
