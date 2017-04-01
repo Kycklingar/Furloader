@@ -99,5 +99,51 @@ namespace Furloader.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE dbinfo(
+        ///	version INT
+        ///);
+        ///
+        ///CREATE TABLE logins(
+        ///	site_id INT,
+        ///	cookie VARCHAR(255),
+        ///	username VARCHAR(64),
+        ///	password VARCHAR(128)
+        ///);
+        ///
+        ///CREATE TABLE locations(
+        ///	
+        ///	source VARCHAR(255),
+        ///	pagesource VARCHAR(255),
+        ///	path VARCHAR(255)
+        ///);
+        ///
+        ///CREATE TABLE sites(
+        ///	site_id INT,
+        ///	site VARCHAR(64) NOT NULL
+        ///);
+        ///
+        ///CREATE TABLE watchlist(
+        ///	site_id INT,
+        ///	author VARCHAR(64),
+        ///	watchlist_user VARCHAR(64),
+        ///	done BIT DEFAULT 0
+        ///);.
+        /// </summary>
+        internal static string SQL_001 {
+            get {
+                return ResourceManager.GetString("SQL_001", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE INDEX pagesource_index ON locations(pagesource);.
+        /// </summary>
+        internal static string SQL_002 {
+            get {
+                return ResourceManager.GetString("SQL_002", resourceCulture);
+            }
+        }
     }
 }

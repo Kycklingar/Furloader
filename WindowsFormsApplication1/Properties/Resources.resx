@@ -130,4 +130,38 @@
   <data name="refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="SQL_001" xml:space="preserve">
+    <value>CREATE TABLE dbinfo(
+	version INT
+);
+
+CREATE TABLE logins(
+	site_id INT,
+	cookie VARCHAR(255),
+	username VARCHAR(64),
+	password VARCHAR(128)
+);
+
+CREATE TABLE locations(
+	
+	source VARCHAR(255),
+	pagesource VARCHAR(255),
+	path VARCHAR(255)
+);
+
+CREATE TABLE sites(
+	site_id INT,
+	site VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE watchlist(
+	site_id INT,
+	author VARCHAR(64),
+	watchlist_user VARCHAR(64),
+	done BIT DEFAULT 0
+);</value>
+  </data>
+  <data name="SQL_002" xml:space="preserve">
+    <value>CREATE INDEX pagesource_index ON locations(pagesource);</value>
+  </data>
 </root>

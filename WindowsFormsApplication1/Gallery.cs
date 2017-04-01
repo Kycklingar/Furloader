@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Furloader.Sites;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,7 +32,7 @@ namespace Furloader
 
         private void updateGallery(object sender, EventArgs e)
         {
-            baseLogin obj = (baseLogin)sender;
+            Website obj = (Website)sender;
             while (true)
             {
                 try
@@ -140,8 +141,8 @@ namespace Furloader
     public class ThumbnailPanel : Panel
     {
         public Submission sub;
-        public baseLogin site;
-        public ThumbnailPanel(Submission submission, baseLogin siteorigin)
+        public Website site;
+        public ThumbnailPanel(Submission submission, Website siteorigin)
         {
             sub = submission;
             site = siteorigin;

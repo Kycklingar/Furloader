@@ -104,7 +104,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Sites\baseLogin.cs" />
+    <Compile Include="Sites\Websites Interface.cs" />
     <Compile Include="Data\DataHandler.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -130,6 +130,7 @@
     <Compile Include="loginPages\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Sites\FurAffinity.cs" />
     <Compile Include="Sites\InkBunny.cs" />
     <Compile Include="login.cs" />
     <Compile Include="loginsForm.cs">

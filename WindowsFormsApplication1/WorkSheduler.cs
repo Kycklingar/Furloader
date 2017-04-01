@@ -4,6 +4,7 @@ using System.Linq;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using Furloader.Sites;
 
 namespace Furloader
 {
@@ -49,7 +50,7 @@ namespace Furloader
     {
         private static readonly object locker = new object();
         private static readonly object locker2 = new object();
-        private furAffinity FA = new furAffinity();
+        private FurAffinity FA = new FurAffinity();
         private InkBunny IB = new InkBunny();
         //public List<Submission> submissions = new List<Submission>();
         public event ChangedGalleryEvent updateGallery;
@@ -197,7 +198,7 @@ namespace Furloader
 
         public void startSubscriptions(int pageLimit, string siteString, bool scraps)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             Thread thread = new Thread(() => getSubscription(pageLimit, site, scraps));
             thread.IsBackground = true;
@@ -206,14 +207,14 @@ namespace Furloader
 
         public void startSearch(string searchString, string siteString, bool scrap)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             Thread thread = new Thread(() => searchDownload(searchString, site, scrap));
             thread.IsBackground = true;
             thread.Start();
         }
 
-        private void getSubscription(int pageLimit, baseLogin site, bool scraps)
+        private void getSubscription(int pageLimit, Website site, bool scraps)
         {
             List<Submission> submissions = new List<Submission>();
             submissions = site.getSubscription(pageLimit);
@@ -252,7 +253,7 @@ namespace Furloader
 
         public void getSubmissions(string user, string siteString, bool scraps)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             if (!usersDownloading.Contains(user + " " + site.Name))
             {
@@ -280,7 +281,7 @@ namespace Furloader
 
         }
 
-        private void searchDownload(string searchString, baseLogin site, bool scraps)
+        private void searchDownload(string searchString, Website site, bool scraps)
         {
             List<Submission> subList = new List<Submission>();
             subList = site.getSearchSubs(searchString);
@@ -308,7 +309,7 @@ namespace Furloader
 
         public void downloadWatchList(string author, string siteString, bool scraps)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             Thread thread = new Thread(() => getWatchList(site, author, scraps));
             thread.IsBackground = true;
@@ -419,7 +420,7 @@ namespace Furloader
         //    }
         //}
 
-        private void getWatchList(baseLogin site, string userToDownload, bool scraps)
+        private void getWatchList(Website site, string userToDownload, bool scraps)
         {
             try
             {
@@ -615,7 +616,7 @@ namespace Furloader
             return returnList;
         }
 
-        private watchList getWatchList(string user, baseLogin site)
+        private watchList getWatchList(string user, Website site)
         {
             List<string> userStrings = site.getWatchList(user);
             if (userStrings == null)
@@ -644,7 +645,7 @@ namespace Furloader
 
         public void getLogin(string siteString)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             if (site != null)
             {
@@ -656,7 +657,7 @@ namespace Furloader
 
         public bool loginSite(string siteString, string username, string password)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
 
             if (site != null)
             {
@@ -667,7 +668,7 @@ namespace Furloader
 
         public bool checkLogin(string siteString)
         {
-            baseLogin site = getSiteFromString(siteString);
+            Website site = getSiteFromString(siteString);
             if (site != null)
             {
                 loginCookies login = datahandler.getLogin(site.Name);
@@ -677,12 +678,12 @@ namespace Furloader
             return false;
         }
 
-        private void loginSite(baseLogin site)
+        private void loginSite(Website site)
         {
             site.login(datahandler);
         }
 
-        private void getSubs(string user, baseLogin site, bool scraps)
+        private void getSubs(string user, Website site, bool scraps)
         {
             string userThreadID;
             //if (scraps)
@@ -717,7 +718,7 @@ namespace Furloader
             usersDownloading.Remove(userThreadID);
         }
 
-        private void downloadSubmissions(List<Submission> submissions, baseLogin site, bool scrap)
+        private void downloadSubmissions(List<Submission> submissions, Website site, bool scrap)
         {
             foreach (Submission sub in submissions)
             {
@@ -775,9 +776,9 @@ namespace Furloader
 
         }
 
-        private baseLogin getSiteFromString(string siteString)
+        private Website getSiteFromString(string siteString)
         {
-            baseLogin site;
+            Website site;
             switch (siteString.ToLower())
             {
                 case "fa":
@@ -796,9 +797,9 @@ namespace Furloader
             return site;
         }
 
-        private baseLogin getSiteFromInt(int x)
+        private Website getSiteFromInt(int x)
         {
-            baseLogin site;
+            Website site;
             switch (x)
             {
                 case (int)SITES.FurAffinity:
@@ -826,7 +827,7 @@ namespace Furloader
             }
         }
 
-        private bool downloadImage(Submission sub, baseLogin site, bool scraps = false)
+        private bool downloadImage(Submission sub, Website site, bool scraps = false)
         {
             bool status = false;
             try
