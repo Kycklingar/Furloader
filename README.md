@@ -1,5 +1,5 @@
-# Furloader
+# FurLoader
 
 Scraper
 
-Download here https://ipfs.io/ipfs/QmbHXFuxnJXQs34ePB8y4EzDamtqTdxPrkJrTzrb2mgh9o
+Download here https://ipfs.io/ipfs/QmfGgdaHXqen7he2ViywgZVZAU6S7BCM5JBxMFyNsUbwMZ
