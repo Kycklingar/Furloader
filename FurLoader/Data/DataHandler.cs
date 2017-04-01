@@ -28,6 +28,7 @@ namespace Furloader
     public class DataHandler
     {
         private const int version = 2;
+
         // SQLite objects
         SQLiteConnection cnn;
 
@@ -38,18 +39,49 @@ namespace Furloader
         public DataHandler()
         {
             cnn = new SQLiteConnection("Data Source=FLDB.db;Version=3");
-
         }
 
+        private bool isFirstLaunch()
+        {
+            cnn.Open();
+            try
+            {
+                SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM dbinfo", cnn);
+                int i = 0;
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                    i++;
+
+                reader.Close();
+                if (i == 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show("Error " + e);
+                return true;
+            }
+            finally
+            {
+                cnn.Close();
+            }
+        }
 
         public int bootDB()
         {
+            int dbVersion = 0;
             if (isFirstLaunch())
             {
                 MessageBox.Show("This program stores usernames and passwords in plain text.\nUse on your own risk", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            int dbVersion = versionInfo();
+            else
+            {
+                dbVersion = versionInfo();
+            }
 
             while (version > dbVersion)
             {
@@ -164,7 +196,10 @@ namespace Furloader
             {
                 Console.WriteLine(e);
             }
-            cnn.Close();
+            finally
+            {
+                cnn.Close();
+            }
             return database_version;
         }
 
@@ -327,34 +362,6 @@ namespace Furloader
             }
 
             return index;
-        }
-
-        private bool isFirstLaunch()
-        {
-            cnn.Open();
-            try
-            {
-                SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM dbinfo", cnn);
-                int i = 0;
-                SQLiteDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                    i++;
-
-                reader.Close();
-                cnn.Close();
-                if (i == 0)
-                {
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error " + e);
-                cnn.Close();
-                return false;
-            }
         }
 
         public bool isPageSource(string source)
