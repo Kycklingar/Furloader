@@ -30,6 +30,7 @@ namespace Furloader
         SqlConnection cnn = new SqlConnection(connectionString);
         private static int version = 5;
         private static readonly object locker = new object();
+        private static string "Test";
 
 
         public DataHandler()
