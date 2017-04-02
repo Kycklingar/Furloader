@@ -39,6 +39,7 @@ namespace Furloader
         private void loginButton_Click(object sender, EventArgs e)
         {
             Close();
+            DialogResult = DialogResult.OK;
         }
 
         public void setCaptcha(Image image)

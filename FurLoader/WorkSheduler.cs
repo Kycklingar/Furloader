@@ -643,16 +643,19 @@ namespace Furloader
             return newWatchList;
         }
 
-        public void getLogin(string siteString)
+        public bool getLogin(string siteString)
         {
             Website site = getSiteFromString(siteString);
 
             if (site != null)
             {
-                Thread thread = new Thread(() => loginSite(site));
-                thread.IsBackground = true;
-                thread.Start();
+                //Thread thread = new Thread(() => loginSite(site));
+                //thread.IsBackground = true;
+                //thread.Start();
+
+                return site.login(datahandler);
             }
+            return false;
         }
 
         public bool loginSite(string siteString, string username, string password)
@@ -676,11 +679,6 @@ namespace Furloader
                 return site.checkLogin(login);
             }
             return false;
-        }
-
-        private void loginSite(Website site)
-        {
-            site.login(datahandler);
         }
 
         private void getSubs(string user, Website site, bool scraps)

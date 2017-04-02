@@ -84,7 +84,7 @@ namespace Furloader.Sites
             return isLoggedIn();
         }
 
-        public override void login(DataHandler datahandler)
+        public override bool login(DataHandler datahandler)
         {
             bool loggedIn = false;
             string html = webHandler.getPage(FALoginPage);
@@ -96,7 +96,11 @@ namespace Furloader.Sites
                 Image image = webHandler.getImage(FACaptcha);
                 furaffinity modal = new furaffinity();
                 modal.setCaptcha(image);
-                modal.ShowDialog();
+                DialogResult result = modal.ShowDialog();
+                if (result == DialogResult.Cancel)
+                {
+                    return false;
+                }
 
 
                 List<string> list;
@@ -114,13 +118,16 @@ namespace Furloader.Sites
                 html = webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
 
                 loggedIn = isLoggedIn();
-                if (!loggedIn) MessageBox.Show("Login Failed!");
+                if (!loggedIn)
+                {
+                    MessageBox.Show("Login Failed!");
+                }
             } while (!loggedIn);
             MessageBox.Show("Success!");
             Uri uri = new Uri(FABase);
             string cookie = webHandler.getCookies(uri);
             datahandler.setLogin("furaffinity", cookie, username, password);
-
+            return true;
         }
 
         public override string validateWatchlistUsername(string username)

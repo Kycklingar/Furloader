@@ -30,7 +30,7 @@ namespace Furloader.Sites
     
     public class Website
     {
-        public virtual void login(DataHandler datahandler) { }
+        public virtual bool login(DataHandler datahandler) { return false; }
         public virtual bool login(DataHandler datahandler, string username, string password) { return false; }
         public virtual string validateWatchlistUsername(string username) { return null; }
         public virtual bool checkLogin(loginCookies login) { return false; }
