@@ -13,9 +13,9 @@ namespace Furloader.Sites
     {
         public override string Name { get { return "furaffinity"; } }
 
-        private const string FABase = "http://www.furaffinity.net/";
+        private const string FABase = "https://www.furaffinity.net/";
         private const string FALoginPage = "https://www.furaffinity.net/login/";
-        private const string FACaptcha = "http://furaffinity.net/captcha.jpg";
+        private const string FACaptcha = "https://furaffinity.net/captcha.jpg";
 
         private int pos = 0;
         private string userLoginName;
@@ -58,7 +58,7 @@ namespace Furloader.Sites
             Submission sub = new Submission();
             sub.thumbnail = image;
             sub.title = subs[i].title;
-            string str = string.Format("http://www.furaffinity.net/view/{0}", subs[i].id);
+            string str = string.Format("{0}view/{1}", FABase, subs[i].id);
             sub.pageSource = str;
 
             return sub;
@@ -111,7 +111,7 @@ namespace Furloader.Sites
                     list[2],
                     "Login to%C2%A0FurAffinity");
 
-                html = webHandler.getPage(FALoginPage + "?ref=http://furaffinity.net/", postData);
+                html = webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
 
                 loggedIn = isLoggedIn();
                 if (!loggedIn) MessageBox.Show("Login Failed!");
@@ -164,8 +164,8 @@ namespace Furloader.Sites
 
             List<Submission> subList = new List<Submission>();
 
-            string scrapUrl = "http://www.furaffinity.net/scraps/" + user + "/";
-            string galleryUrl = "http://www.furaffinity.net/gallery/" + user + "/";
+            string scrapUrl = FABase + "scraps/" + user + "/";
+            string galleryUrl = FABase + "gallery/" + user + "/";
             try
             {
                 subList.AddRange(dlGallery(galleryUrl));
@@ -314,8 +314,8 @@ namespace Furloader.Sites
         public override List<Submission> getSubscription(int pageLimit)
         {
             List<Submission> subList = new List<Submission>();
-            string baseUrl = "http://www.furaffinity.net";
-            string nextUrl = baseUrl + "/msg/submissions/";
+            string baseUrl = FABase;
+            string nextUrl = baseUrl + "msg/submissions/";
 
             for (int i = 0; i < pageLimit; i++)
             {
@@ -455,7 +455,7 @@ namespace Furloader.Sites
             try
             {
                 bool finished = false;
-                string watchlistUrl = string.Format("http://www.furaffinity.net/watchlist/by/{0}/", user);
+                string watchlistUrl = string.Format("{0}watchlist/by/{1}/", FABase, user);
                 int pageN = 1;
                 while (!finished)
                 {
