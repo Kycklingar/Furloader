@@ -58,7 +58,7 @@ namespace Furloader.Sites
             Submission sub = new Submission();
             sub.thumbnail = image;
             sub.title = subs[i].title;
-            string str = string.Format("{0}view/{1}", FABase, subs[i].id);
+            string str = string.Format("FA_{0}", subs[i].id);
             sub.pageSource = str;
 
             return sub;
@@ -245,7 +245,7 @@ namespace Furloader.Sites
 
                             sub.domain = "www.furaffinity.net";
                             sub.id = sid;
-                            sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
+                            sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
                             sub.title = title;
 
@@ -297,7 +297,7 @@ namespace Furloader.Sites
 
                                 sub.domain = "www.furaffinity.net";
                                 sub.id = sid;
-                                sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
+                                sub.pageSource = string.Format("FA_{0}", sid);
                                 sub.thumbSource = "http:" + thumb;
                                 sub.title = title;
 
@@ -346,7 +346,8 @@ namespace Furloader.Sites
 
                             sub.domain = "www.furaffinity.net";
                             sub.id = sid;
-                            sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
+                            //sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
+                            sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
                             sub.title = title;
 
@@ -379,7 +380,7 @@ namespace Furloader.Sites
             Subs sub = new Subs();
             try
             {
-                string subHtml = webHandler.getPage(pageSource);
+                string subHtml = webHandler.getPage(sourceFromId(pageSource));
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(subHtml);
                 //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
@@ -397,10 +398,15 @@ namespace Furloader.Sites
             return sub;
         }
 
+        private string sourceFromId(string pageSource)
+        {
+            return string.Format("{0}view/{1}/", FABase, pageSource.Remove(0, 3));
+        }
+
         public override Submission getSubInfo(Submission sub)
         {
 
-            string subHtml = webHandler.getPage(sub.pageSource);
+            string subHtml = webHandler.getPage(sourceFromId(sub.pageSource));
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(subHtml);
             //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
