@@ -15,7 +15,7 @@ namespace Furloader
     }
 
     // This is the main form. TODO: Rename
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         public WorkSheduler worker;
         private bool isClosing = false;
@@ -27,7 +27,7 @@ namespace Furloader
         private string waitText = "1000";
         private string threadsText = "1";
 
-        public Form1(WorkSheduler work)
+        public MainForm(WorkSheduler work)
         {
             InitializeComponent();
             worker = work;

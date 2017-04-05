@@ -17,7 +17,7 @@ namespace Furloader
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             WorkSheduler worker = new WorkSheduler();
-            Application.Run(new Form1(worker));
+            Application.Run(new MainForm(worker));
             
         }
     }
