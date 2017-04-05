@@ -132,7 +132,6 @@
     </Compile>
     <Compile Include="Sites\FurAffinity.cs" />
     <Compile Include="Sites\InkBunny.cs" />
-    <Compile Include="login.cs" />
     <Compile Include="loginsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -141,12 +140,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="textWall.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="textWall.Designer.cs">
-      <DependentUpon>textWall.cs</DependentUpon>
-    </Compile>
     <Compile Include="WebHandler.cs" />
     <Compile Include="WorkSheduler.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -174,9 +167,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="textWall.resx">
-      <DependentUpon>textWall.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

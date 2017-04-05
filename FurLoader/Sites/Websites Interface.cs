@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Drawing;
-using HtmlAgilityPack;
-using System.Windows.Forms;
 
 namespace Furloader.Sites
 {

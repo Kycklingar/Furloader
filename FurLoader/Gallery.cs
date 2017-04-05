@@ -15,6 +15,7 @@ namespace Furloader
     public delegate void GetImage(object sender, EventArgs e);
 
     // This is a experimental gallery viewer
+    // Currently unused
     public partial class Gallery : Form
     {
         WorkSheduler worker;

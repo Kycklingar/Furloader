@@ -3,7 +3,6 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Drawing;
-using System.Web;
 
 namespace Furloader
 {

@@ -1,10 +1,8 @@
 ﻿using Furloader.Sites;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.IO;
-using System.Resources;
 using System.Windows.Forms;
 
 
@@ -529,7 +527,6 @@ namespace Furloader
             return WL;
         }
 
-        // Set the watchlist in the db. Set the done for the specific user if setDone == false
         public void setWatchList(watchList users, bool setDone=true)
         {
             string site_id = createSite(users.site);
