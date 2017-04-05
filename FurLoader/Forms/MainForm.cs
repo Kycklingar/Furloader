@@ -24,7 +24,7 @@ namespace Furloader
         private int newFiles = 0;
         private int remaining = 0;
 
-        private string waitText = "1000";
+        private string waitText = "2500";
         private string threadsText = "1";
 
         public MainForm(WorkSheduler work)
@@ -101,6 +101,7 @@ namespace Furloader
 
         }
 
+        // Is there a better way? Let me know :)
         private int getModeFromString(string item)
         {
             switch (item)
