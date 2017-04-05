@@ -40,7 +40,14 @@ namespace Furloader
 
         private void button1_Click(object sender, EventArgs e)
         {
-            worker.getLogin("FA");
+            if (worker.getLogin("FA"))
+            {
+                pictureBox_FA.Image = Properties.Resources.LoginOK;
+            }
+            else
+            {
+                pictureBox_FA.Image = Properties.Resources.LoginFailed;
+            }
         }
 
         private void inkbunny_Click(object sender, EventArgs e)
@@ -54,6 +61,10 @@ namespace Furloader
                     {
                         pictureBox_IB.Image = Properties.Resources.LoginOK;
                     }
+                }
+                else
+                {
+                    pictureBox_IB.Image = Properties.Resources.LoginFailed;
                 }
             }
         }

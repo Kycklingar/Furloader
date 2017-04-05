@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Furloader
+namespace Furloader.Sites
 {
-    class InkBunny : baseLogin
+    class InkBunny : Website
     {
         public override string Name { get { return "inkbunny"; } }
 

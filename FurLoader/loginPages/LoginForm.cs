@@ -16,14 +16,14 @@ namespace Furloader.loginPages
         public bool Success = false;
         public LoginForm(WorkSheduler work, string Title)
         {
-            Name = Title;
             worker = work;
             InitializeComponent();
+            Text = Title;
         }
 
         private void loginButton_Click(object sender, EventArgs e)
         {
-            if (worker.loginSite("inkbunny", username_TxtBox.Text, password_TxtBox.Text))
+            if (worker.loginSite(Text, username_TxtBox.Text, password_TxtBox.Text))
             {
                 Success = true;
                 DialogResult = DialogResult.OK;

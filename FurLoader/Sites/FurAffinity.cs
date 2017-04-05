@@ -1,62 +1,21 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.Drawing;
-using HtmlAgilityPack;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Furloader
+namespace Furloader.Sites
 {
-
-    public struct Subs
-    {
-        public Uri thumbnail;
-        public Uri fileSrc;
-        public int id;
-        public string title;
-        //public string description;
-        public string author;
-        //public List<string> tags;
-    }
-
-    public struct loginCookies
-    {
-        public string username;
-        public string password;
-        public string cookies;
-    }
-
-    // The site interface. TODO: Rename to reflect what it actually does.
-    public class baseLogin
-    {
-        public virtual void login(DataHandler datahandler) { }
-        public virtual bool login(DataHandler datahandler, string username, string password) { return false; }
-        public virtual string validateWatchlistUsername(string username) { return null; }
-        public virtual bool checkLogin(loginCookies login) { return false; }
-        public virtual List<Submission> loadSubbmissionsFromUser(string user, bool scraps = false) { return null; }
-        public virtual Submission getNextImage() { return new Submission(); }
-        //public virtual void getImage(string pageSource) { }
-        public virtual byte[] getImage(string fileSource) { return null; }
-        public virtual List<Subs> getThumbsList() { return null; }
-        public virtual event changedEventHandler Changed;
-        public virtual string getCookies() { return null; }
-        public virtual Submission getSubInfo(Submission sub) { return new Submission(); }
-        public virtual List<String> getWatchList(string user) { return null; }
-        public virtual string Name { get; }
-        public virtual List<Submission> getSubscription(int pageLimit) { return null; }
-        public virtual List<Submission> getSearchSubs(string searchString) { return null; }
-
-    }
-
-    public class furAffinity : baseLogin
+    public class FurAffinity : Website
     {
         public override string Name { get { return "furaffinity"; } }
 
-        private const string FurAffinity = "http://www.furaffinity.net/";
+        private const string FABase = "https://www.furaffinity.net/";
         private const string FALoginPage = "https://www.furaffinity.net/login/";
-        private const string FACaptcha = "http://furaffinity.net/captcha.jpg";
+        private const string FACaptcha = "https://furaffinity.net/captcha.jpg";
 
         private int pos = 0;
         private string userLoginName;
@@ -78,7 +37,7 @@ namespace Furloader
 
         public override string getCookies()
         {
-            Uri fa = new Uri(FurAffinity);
+            Uri fa = new Uri(FABase);
             string cookies = webHandler.getCookies(fa);
             return cookies;
         }
@@ -99,7 +58,7 @@ namespace Furloader
             Submission sub = new Submission();
             sub.thumbnail = image;
             sub.title = subs[i].title;
-            string str = string.Format("http://www.furaffinity.net/view/{0}", subs[i].id);
+            string str = string.Format("FA_{0}", subs[i].id);
             sub.pageSource = str;
 
             return sub;
@@ -125,7 +84,7 @@ namespace Furloader
             return isLoggedIn();
         }
 
-        public override void login(DataHandler datahandler)
+        public override bool login(DataHandler datahandler)
         {
             bool loggedIn = false;
             string html = webHandler.getPage(FALoginPage);
@@ -137,7 +96,11 @@ namespace Furloader
                 Image image = webHandler.getImage(FACaptcha);
                 furaffinity modal = new furaffinity();
                 modal.setCaptcha(image);
-                modal.ShowDialog();
+                DialogResult result = modal.ShowDialog();
+                if (result == DialogResult.Cancel)
+                {
+                    return false;
+                }
 
 
                 List<string> list;
@@ -152,16 +115,19 @@ namespace Furloader
                     list[2],
                     "Login to%C2%A0FurAffinity");
 
-                html = webHandler.getPage(FALoginPage + "?ref=http://furaffinity.net/", postData);
+                html = webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
 
                 loggedIn = isLoggedIn();
-                if (!loggedIn) MessageBox.Show("Login Failed!");
+                if (!loggedIn)
+                {
+                    MessageBox.Show("Login Failed!");
+                }
             } while (!loggedIn);
             MessageBox.Show("Success!");
-            Uri uri = new Uri(FurAffinity);
+            Uri uri = new Uri(FABase);
             string cookie = webHandler.getCookies(uri);
             datahandler.setLogin("furaffinity", cookie, username, password);
-
+            return true;
         }
 
         public override string validateWatchlistUsername(string username)
@@ -205,8 +171,8 @@ namespace Furloader
 
             List<Submission> subList = new List<Submission>();
 
-            string scrapUrl = "http://www.furaffinity.net/scraps/" + user + "/";
-            string galleryUrl = "http://www.furaffinity.net/gallery/" + user + "/";
+            string scrapUrl = FABase + "scraps/" + user + "/";
+            string galleryUrl = FABase + "gallery/" + user + "/";
             try
             {
                 subList.AddRange(dlGallery(galleryUrl));
@@ -227,7 +193,7 @@ namespace Furloader
 
         public override List<Submission> getSearchSubs(string searchString)
         {
-            string url = FurAffinity + "search/";
+            string url = FABase + "search/";
             string extraData = "perpage=72&order-by=date&order-direction=desc&range=all&rating-general=on&rating-mature=on&rating-adult=on&type-art=on&type-flash=on&type-photo=on&type-music=on&type-story=on&type-poetry=on&mode=extended";
 
             string data = string.Format("q={0}&{1}&do_search=Search", searchString, extraData);
@@ -244,9 +210,9 @@ namespace Furloader
             List<Submission> subList = new List<Submission>();
 
             bool done = false;
-            while(!done)
+            while (!done)
             {
-                if(pageNum > 1)
+                if (pageNum > 1)
                 {
                     data = string.Format("q={0}&page={1}&{2}&nex_page={3}", searchString, pageNum - 1, extraData, nextPage);
                     html = webHandler.getPage(url, data);
@@ -279,7 +245,7 @@ namespace Furloader
 
                             sub.domain = "www.furaffinity.net";
                             sub.id = sid;
-                            sub.pageSource = string.Format("{0}view/{1}", FurAffinity, sid);
+                            sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
                             sub.title = title;
 
@@ -331,7 +297,7 @@ namespace Furloader
 
                                 sub.domain = "www.furaffinity.net";
                                 sub.id = sid;
-                                sub.pageSource = string.Format("{0}view/{1}", FurAffinity, sid);
+                                sub.pageSource = string.Format("FA_{0}", sid);
                                 sub.thumbSource = "http:" + thumb;
                                 sub.title = title;
 
@@ -355,8 +321,8 @@ namespace Furloader
         public override List<Submission> getSubscription(int pageLimit)
         {
             List<Submission> subList = new List<Submission>();
-            string baseUrl = "http://www.furaffinity.net";
-            string nextUrl = baseUrl + "/msg/submissions/";
+            string baseUrl = FABase;
+            string nextUrl = baseUrl + "msg/submissions/";
 
             for (int i = 0; i < pageLimit; i++)
             {
@@ -380,7 +346,8 @@ namespace Furloader
 
                             sub.domain = "www.furaffinity.net";
                             sub.id = sid;
-                            sub.pageSource = string.Format("{0}view/{1}", FurAffinity, sid);
+                            //sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
+                            sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
                             sub.title = title;
 
@@ -413,7 +380,7 @@ namespace Furloader
             Subs sub = new Subs();
             try
             {
-                string subHtml = webHandler.getPage(pageSource);
+                string subHtml = webHandler.getPage(sourceFromId(pageSource));
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(subHtml);
                 //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
@@ -431,22 +398,27 @@ namespace Furloader
             return sub;
         }
 
+        private string sourceFromId(string pageSource)
+        {
+            return string.Format("{0}view/{1}/", FABase, pageSource.Remove(0, 3));
+        }
+
         public override Submission getSubInfo(Submission sub)
         {
 
-            string subHtml = webHandler.getPage(sub.pageSource);
+            string subHtml = webHandler.getPage(sourceFromId(sub.pageSource));
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(subHtml);
             //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
             sub.author = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/a").InnerText;
             //string url = "http:" + doc.DocumentNode.SelectSingleNode("//img[@id='submissionImg']").GetAttributeValue("src", null);
             string url = "http:" + doc.DocumentNode.SelectSingleNode("//div[@class='alt1 actions aligncenter']/b[a='Download']/a").GetAttributeValue("href", null);
-            
+
             sub.fileSource = url;
 
             int lastIndex = url.LastIndexOf('/');
             sub.filename = url.Substring(lastIndex + 1, (url.Length - lastIndex - 1));
-            
+
             string scraps = doc.DocumentNode.SelectSingleNode("//a[@class='dotted']").InnerText;
             if (scraps.Contains("Scraps"))
                 sub.scrap = true;
@@ -496,7 +468,7 @@ namespace Furloader
             try
             {
                 bool finished = false;
-                string watchlistUrl = string.Format("http://www.furaffinity.net/watchlist/by/{0}/", user);
+                string watchlistUrl = string.Format("{0}watchlist/by/{1}/", FABase, user);
                 int pageN = 1;
                 while (!finished)
                 {
@@ -537,7 +509,7 @@ namespace Furloader
         private bool isLoggedIn()
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            string web = webHandler.getPage(FurAffinity);
+            string web = webHandler.getPage(FABase);
             doc.LoadHtml(web);
             HtmlNode node = doc.DocumentNode.SelectSingleNode("//a[@href='/submit/']");
 

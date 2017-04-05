@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Furloader.Sites;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
-using System.Windows.Forms;
+using System.Data.SQLite;
 using System.IO;
+using System.Resources;
+using System.Windows.Forms;
+
 
 namespace Furloader
 {
@@ -26,26 +27,61 @@ namespace Furloader
 
     public class DataHandler
     {
-        static string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\\FLDB.mdf;Integrated Security=True";
-        SqlConnection cnn = new SqlConnection(connectionString);
-        private static int version = 5;
+        private const int version = 2;
+
+        // SQLite objects
+        SQLiteConnection cnn;
+
+
         private static readonly object locker = new object();
 
 
         public DataHandler()
         {
+            cnn = new SQLiteConnection("Data Source=FLDB.db;Version=3");
         }
 
+        private bool isFirstLaunch()
+        {
+            cnn.Open();
+            try
+            {
+                SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM dbinfo", cnn);
+                int i = 0;
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                    i++;
+
+                reader.Close();
+                if (i == 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show("Error " + e);
+                return true;
+            }
+            finally
+            {
+                cnn.Close();
+            }
+        }
 
         public int bootDB()
         {
+            int dbVersion = 0;
             if (isFirstLaunch())
             {
                 MessageBox.Show("This program stores usernames and passwords in plain text.\nUse on your own risk", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                initDB();
             }
-
-            int dbVersion = versionInfo();
+            else
+            {
+                dbVersion = versionInfo();
+            }
 
             while (version > dbVersion)
             {
@@ -61,7 +97,7 @@ namespace Furloader
                 try
                 {
                     cnn.Open();
-                    SqlCommand cmd = new SqlCommand("UPDATE dbinfo SET version = @ver", cnn);
+                    SQLiteCommand cmd = new SQLiteCommand("UPDATE dbinfo SET version = @ver", cnn);
                     cmd.Parameters.AddWithValue("ver", dbVersion);
                     cmd.ExecuteNonQuery();
                 }
@@ -79,79 +115,37 @@ namespace Furloader
 
             return dbVersion;
         }
-
-        // TODO: Update from sql files
+        
         private int updateDB(int toDBver)
         {
             int result = 0;
             try
             {
                 cnn.Open();
+
                 switch (toDBver)
                 {
+                    case 1:
+                        {
+                            string cmdText = Properties.Resources.SQL_001;
+                            SQLiteCommand cmd = new SQLiteCommand(cmdText, cnn);
+                            cmd.ExecuteNonQuery();
+                            cmd.CommandText = "INSERT INTO dbinfo VALUES(@version)";
+                            cmd.Parameters.Add(new SQLiteParameter("version", 1));
+                            cmd.ExecuteNonQuery();
+                            result = 1;
+                        }
+                        break;
+
                     case 2:
                         {
-                            SqlCommand cmd = new SqlCommand("CREATE TABLE watchlist (site_id INT, author CHAR(64))", cnn);
+                            string cmdText = Properties.Resources.SQL_002;
+                            SQLiteCommand cmd = new SQLiteCommand(cmdText, cnn);
                             cmd.ExecuteNonQuery();
                             result = 2;
                         }
                         break;
-                    case 3:
-                        {
-                            SqlCommand cmd = new SqlCommand("TRUNCATE TABLE watchlist", cnn);
-                            cmd.ExecuteNonQuery();
-                            cmd.CommandText = "ALTER TABLE watchlist ADD done BIT DEFAULT 0, watchlist_user VARCHAR(64)";
-                            cmd.ExecuteNonQuery();
-                            result = 3;
-                        }
-                        break;
-                    case 4:
-                        {
-                            string str = "ALTER TABLE locations ALTER COLUMN source VARCHAR(255) NOT NULL; ";
-                            str += "ALTER TABLE locations ALTER COLUMN pagesource VARCHAR(255) NOT NULL; ";
-                            str += "ALTER TABLE locations ALTER COLUMN path VARCHAR(255) NOT NULL;";
-                            SqlCommand cmd = new SqlCommand(str, cnn);
-                            cmd.CommandTimeout = 0;
-                            cmd.ExecuteNonQuery();
 
-                            removeWhitespace("locations", "source");
-                            removeWhitespace("locations", "pagesource");
-                            removeWhitespace("locations", "path");
-
-                            str = "ALTER TABLE logins ALTER COLUMN cookie VARCHAR(255); ";
-                            str += "ALTER TABLE logins ALTER COLUMN username VARCHAR(255); ";
-                            str += "ALTER TABLE logins ALTER COLUMN password VARCHAR(255);";
-                            cmd.CommandText = str;
-                            cmd.ExecuteNonQuery();
-
-                            removeWhitespace("logins", "cookie");
-                            removeWhitespace("logins", "username");
-                            removeWhitespace("logins", "password");
-
-
-                            str = "ALTER TABLE sites ALTER COLUMN site VARCHAR(255) NOT NULL";
-                            cmd.CommandText = str;
-                            cmd.ExecuteNonQuery();
-
-                            removeWhitespace("sites", "site");
-
-
-                            str = "ALTER TABLE watchlist ALTER COLUMN author VARCHAR(64)";
-                            cmd.CommandText = str;
-                            cmd.ExecuteNonQuery();
-
-                            removeWhitespace("watchlist", "author");
-
-                            result = 4;
-                        }
-                        break;
-                    case 5:
-                        {
-                            SqlCommand cmd = new SqlCommand("CREATE INDEX index_location ON locations(pagesource);", cnn);
-                            cmd.ExecuteNonQuery();
-                            result = 5;
-                        }
-                        break;
                     default:
                         result = 0;
                         break;
@@ -173,7 +167,7 @@ namespace Furloader
             try
             {
                 string str = string.Format("UPDATE {0} SET {1} = RTRIM({1})", table, column);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 cmd.ExecuteNonQuery();
             }
             catch(Exception e)
@@ -182,73 +176,14 @@ namespace Furloader
             }
         }
 
-        private void initDB()
-        {
-            // This is horrible!!
-
-            /*  DB layout V2:
-             *  TABLE       | COLUMN
-             *  ------------|-----------------------------------------------
-             *  dbinfo      |INT    |
-             *              |version|
-             * -------------|-----------------------------------------------
-             *  logins      |INT    |VARCHAR|CHAR       |CHAR    |
-             *              |site_id|cookie |username   |password|
-             *  ------------|-----------------------------------------------
-             *  locations   |INT    |CHAR   |CHAR       |CHAR  |
-             *              |hash_id|source |pagesource |path  |
-             *  ------------|-----------------------------------------------
-             *  hashes      |INT    |BINARY(128)| //MD5 hash
-             *              |hash_id|hash       |
-             *  ------------|-----------------------------------------------
-             *  sites       |INT    |CHAR   |
-             *              |site_id|site   |
-             *  ------------------------------------------------------------
-             *  watchlist   |INT    |CHAR   |
-             *              |site_id|author   |
-             *              
-             */
-            try
-            {
-                cnn.Open();
-                SqlCommand cmd = new SqlCommand("CREATE TABLE dbinfo (version INT)", cnn);
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "CREATE TABLE logins (site_id INT, cookie CHAR(255), username CHAR(255), password CHAR(255))";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "CREATE TABLE locations (hash_id INT, source CHAR(255), pagesource CHAR(255), path CHAR(255))";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "CREATE TABLE hashes (hash_id INT, hash BINARY(128))";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "CREATE TABLE sites (site_id INT, site CHAR(255))";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "CREATE TABLE watchlist (site_id INT, author CHAR(64), watchlist_user VARCHAR(64), done BIT DEFAULT 0)";
-                cmd.ExecuteNonQuery();
-
-
-                cmd.CommandText = "INSERT INTO dbinfo VALUES(@version)";
-                cmd.Parameters.Add(new SqlParameter("version", version));
-                cmd.ExecuteNonQuery();
-
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error: " + e);
-            }
-            finally
-            {
-                cnn.Close();
-            }
-
-        }
-
         private int versionInfo()
         {
             int database_version = 0;
             try
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT version FROM dbinfo", cnn);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                SQLiteCommand cmd = new SQLiteCommand("SELECT version FROM dbinfo", cnn);
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
@@ -261,7 +196,10 @@ namespace Furloader
             {
                 Console.WriteLine(e);
             }
-            cnn.Close();
+            finally
+            {
+                cnn.Close();
+            }
             return database_version;
         }
 
@@ -272,9 +210,9 @@ namespace Furloader
             {
                 cnn.Open();
                 string str = string.Format("SELECT site_id FROM sites WHERE site='{0}'", site);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 string site_id = null;
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
@@ -282,7 +220,7 @@ namespace Furloader
                     }
                 }
                 cmd.CommandText = string.Format("SELECT * FROM logins WHERE site_id='{0}'", site_id);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -308,9 +246,9 @@ namespace Furloader
                 cnn.Open();
 
                 string str = string.Format("SELECT site_id FROM sites WHERE site='{0}'", site);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 string site_id = null;
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
@@ -341,8 +279,8 @@ namespace Furloader
                 cnn.Open();
                 int ind = 0;
                 string str = string.Format("SELECT * FROM logins WHERE site_id='{0}'", site_id);
-                SqlCommand cmd = new SqlCommand(str, cnn);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -352,10 +290,10 @@ namespace Furloader
                 if (ind == 0)
                 {
                     cmd.CommandText = "INSERT INTO logins VALUES(@site_id, @cookie, @username, @password)";
-                    cmd.Parameters.Add(new SqlParameter("site_id", site_id));
-                    cmd.Parameters.Add(new SqlParameter("cookie", cookie));
-                    cmd.Parameters.Add(new SqlParameter("username", username));
-                    cmd.Parameters.Add(new SqlParameter("password", password));
+                    cmd.Parameters.Add(new SQLiteParameter("site_id", site_id));
+                    cmd.Parameters.Add(new SQLiteParameter("cookie", cookie));
+                    cmd.Parameters.Add(new SQLiteParameter("username", username));
+                    cmd.Parameters.Add(new SQLiteParameter("password", password));
                     cmd.ExecuteNonQuery();
                 }
                 else
@@ -385,9 +323,9 @@ namespace Furloader
 
                 string str = string.Format("SELECT * FROM sites WHERE site='{0}'", site);
 
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
 
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
 
                     if (reader.Read())
@@ -401,15 +339,15 @@ namespace Furloader
                 {
 
                     cmd.CommandText = "SELECT COUNT(*) FROM sites";
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
                         reader.Read();
                         index = reader[0].ToString();
                     }
                     str = string.Format("INSERT INTO sites VALUES(@site_id, @site)");
                     cmd.CommandText = str;
-                    cmd.Parameters.Add(new SqlParameter("site_id", index));
-                    cmd.Parameters.Add(new SqlParameter("site", site));
+                    cmd.Parameters.Add(new SQLiteParameter("site_id", index));
+                    cmd.Parameters.Add(new SQLiteParameter("site", site));
                     cmd.ExecuteNonQuery();
                 }
 
@@ -426,34 +364,6 @@ namespace Furloader
             return index;
         }
 
-        private bool isFirstLaunch()
-        {
-            cnn.Open();
-            try
-            {
-                SqlCommand cmd = new SqlCommand("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'dbinfo'", cnn);
-                int i = 0;
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                    i++;
-
-                reader.Close();
-                cnn.Close();
-                if (i == 0)
-                {
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error " + e);
-                cnn.Close();
-                return false;
-            }
-        }
-
         public bool isPageSource(string source)
         {
             bool result = false;
@@ -463,8 +373,8 @@ namespace Furloader
                 {
                     cnn.Open();
                     string str = string.Format("SELECT * FROM locations WHERE pagesource='{0}'", source);
-                    SqlCommand cmd = new SqlCommand(str, cnn);
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    SQLiteCommand cmd = new SQLiteCommand(str, cnn);
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -513,11 +423,10 @@ namespace Furloader
                     {
                         cnn.Open();
 
-                        SqlCommand cmd = new SqlCommand("INSERT INTO locations VALUES(@hash_id, @source, @pagesource, @path)", cnn);
-                        cmd.Parameters.Add(new SqlParameter("@hash_id", "0"));
-                        cmd.Parameters.Add(new SqlParameter("@source", source));
-                        cmd.Parameters.Add(new SqlParameter("@pagesource", pagesource));
-                        cmd.Parameters.Add(new SqlParameter("@path", location));
+                        SQLiteCommand cmd = new SQLiteCommand("INSERT INTO locations VALUES(@source, @pagesource, @path)", cnn);
+                        cmd.Parameters.Add(new SQLiteParameter("@source", source));
+                        cmd.Parameters.Add(new SQLiteParameter("@pagesource", pagesource));
+                        cmd.Parameters.Add(new SQLiteParameter("@path", location));
                         cmd.ExecuteNonQuery();
 
 
@@ -551,9 +460,9 @@ namespace Furloader
             try
             {
                 cnn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT * FROM watchlist WHERE site_id = @id", cnn);
+                SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM watchlist WHERE site_id = @id", cnn);
                 cmd.Parameters.AddWithValue("id", site_id);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                         result = true;
@@ -581,8 +490,8 @@ namespace Furloader
             {
                 cnn.Open();
                 string str = string.Format("SELECT author, done FROM watchlist WHERE site_id = '{0}' AND watchlist_user = '{1}'", site_id, username);
-                SqlCommand cmd = new SqlCommand(str, cnn);
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -629,11 +538,11 @@ namespace Furloader
             {
                 cnn.Open();
                 string str = string.Format("DELETE FROM watchlist WHERE site_id='{0}' AND watchlist_user='{1}'", site_id, users.watchlistUser);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 cmd.ExecuteNonQuery();
                 foreach (watchedUser user in users.users)
                 {
-                    cmd = new SqlCommand("INSERT INTO watchlist(site_id, author, watchlist_user, done) values(@site_id, @author, @watchlist_user, @done)", cnn);
+                    cmd = new SQLiteCommand("INSERT INTO watchlist(site_id, author, watchlist_user, done) values(@site_id, @author, @watchlist_user, @done)", cnn);
                     cmd.Parameters.AddWithValue("@site_id", site_id);
                     cmd.Parameters.AddWithValue("@author", user.user);
                     cmd.Parameters.AddWithValue("@watchlist_user", watchListUser);
@@ -665,7 +574,7 @@ namespace Furloader
             {
                 cnn.Open();
                 string str = string.Format("UPDATE watchlist SET done='{2}' WHERE site_id='{0}' AND author='{1}' AND watchlist_user='{3}'", site_id, user, sDone, watchListUser);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -686,7 +595,7 @@ namespace Furloader
             {
                 cnn.Open();
                 string str = string.Format("DELETE FROM watchlist WHERE site_id='{0}'", site_id);
-                SqlCommand cmd = new SqlCommand(str, cnn);
+                SQLiteCommand cmd = new SQLiteCommand(str, cnn);
                 cmd.ExecuteNonQuery();
             }
             catch(Exception e)
