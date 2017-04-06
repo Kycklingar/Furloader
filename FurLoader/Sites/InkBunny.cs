@@ -16,7 +16,7 @@ namespace Furloader.Sites
 
         private string loggedinUsername;
 
-        public override bool login(DataHandler datahandler, string username, string password)
+        public override bool login(DataHandler datahandler, string username, string password, string captcha = null)
         {
             try
             {

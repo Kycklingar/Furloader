@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Furloader.Sites
 {
@@ -21,11 +22,17 @@ namespace Furloader.Sites
         public string password;
         public string cookies;
     }
-    
+
+    public struct LoginData
+    {
+        public Image Captcha;
+    }
+
     public class Website
     {
         public virtual bool login(DataHandler datahandler) { return false; }
-        public virtual bool login(DataHandler datahandler, string username, string password) { return false; }
+        public virtual bool login(DataHandler datahandler, string username, string password, string captcha = null) { return false; }
+        public virtual LoginData GetLoginData() { return new LoginData(); }
         public virtual string validateWatchlistUsername(string username) { return null; }
         public virtual bool checkLogin(loginCookies login) { return false; }
         public virtual List<Submission> loadSubbmissionsFromUser(string user, bool scraps = false) { return null; }

@@ -31,15 +31,21 @@ namespace Furloader
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void furaffinity_Click(object sender, EventArgs e)
         {
-            if (worker.getLogin("FA"))
+            using (var form = new loginPages.LoginFormFA(worker, "Furaffinity"))
             {
-                pictureBox_FA.Image = Properties.Resources.LoginOK;
-            }
-            else
-            {
-                pictureBox_FA.Image = Properties.Resources.LoginFailed;
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    if (form.Success)
+                    {
+                        pictureBox_FA.Image = Properties.Resources.LoginOK;
+                    }
+                }
+                else
+                {
+                    pictureBox_FA.Image = Properties.Resources.LoginFailed;
+                }
             }
         }
 
@@ -49,7 +55,6 @@ namespace Furloader
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    Console.WriteLine("Success");
                     if (form.Success)
                     {
                         pictureBox_IB.Image = Properties.Resources.LoginOK;

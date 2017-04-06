@@ -45,7 +45,7 @@
             this.furaffinity.TabIndex = 0;
             this.furaffinity.Text = "FurAffinity";
             this.furaffinity.UseVisualStyleBackColor = true;
-            this.furaffinity.Click += new System.EventHandler(this.button1_Click);
+            this.furaffinity.Click += new System.EventHandler(this.furaffinity_Click);
             // 
             // inkbunny
             // 
