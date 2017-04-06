@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Furloader.Sites
 {
@@ -82,50 +81,35 @@ namespace Furloader.Sites
             return isLoggedIn();
         }
 
-        public override bool login(DataHandler datahandler)
+        public override LoginData GetLoginData()
         {
-            bool loggedIn = false;
             string html = webHandler.getPage(FALoginPage);
-            string username, password;
-            //Didn't know what I was doing, cant be bothered to fix
-            do
+
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(html);
+            string captchaLink = doc.GetElementbyId("captcha_img").Attributes["src"].Value;
+
+            return new LoginData { Captcha = webHandler.getImage(FABase + captchaLink) };
+        }
+
+        public override bool login(DataHandler datahandler, string username, string password, string captcha)
+        {
+            string postData = string.Format("action=login&name={0}&pass={1}&g-recaptcha-response=&use_old_captcha=1&captcha={2}&login={3}",
+                username,
+                password,
+                captcha,
+                "Login to%C2%A0FurAffinity");
+
+            webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
+
+            if (isLoggedIn())
             {
-
-                Image image = webHandler.getImage(FACaptcha);
-                furaffinity modal = new furaffinity();
-                modal.setCaptcha(image);
-                DialogResult result = modal.ShowDialog();
-                if (result == DialogResult.Cancel)
-                {
-                    return false;
-                }
-
-
-                List<string> list;
-                list = modal.getInputs();
-
-                username = list[0];
-                password = list[1];
-
-                string postData = string.Format("action=login&name={0}&pass={1}&g-recaptcha-response=&use_old_captcha=1&captcha={2}&login={3}",
-                    list[0],
-                    list[1],
-                    list[2],
-                    "Login to%C2%A0FurAffinity");
-
-                html = webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
-
-                loggedIn = isLoggedIn();
-                if (!loggedIn)
-                {
-                    MessageBox.Show("Login Failed!");
-                }
-            } while (!loggedIn);
-            MessageBox.Show("Success!");
-            Uri uri = new Uri(FABase);
-            string cookie = webHandler.getCookies(uri);
-            datahandler.setLogin("furaffinity", cookie, username, password);
-            return true;
+                Uri uri = new Uri(FABase);
+                string cookie = webHandler.getCookies(uri);
+                datahandler.setLogin("furaffinity", cookie, username, password);
+                return true;
+            }
+            return false;
         }
 
         public override string validateWatchlistUsername(string username)

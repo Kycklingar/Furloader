@@ -50,7 +50,7 @@ namespace Furloader
                 string name = cock.Name;
                 string value = cock.Value;
                 string expires = cock.Expires.ToString();
-                cookie += name+"?"+value+"?"+path+"?"+domain+"?"+expires + "\n";
+                cookie += name + "?" + value + "?" + path + "?" + domain + "?" + expires + "\n";
             }
             cookie = cookie.TrimEnd('\n');
             return cookie;
@@ -62,6 +62,10 @@ namespace Furloader
             string result;
             using (WebResponse resp = GET(URI))
             {
+                if(resp == null)
+                {
+                    return "";
+                }
                 refer = URL;
 
                 var stream = resp.GetResponseStream();
@@ -69,7 +73,7 @@ namespace Furloader
                 result = reader.ReadToEnd();
 
                 result = WebUtility.HtmlDecode(result);
-                
+
             }
             return result;
         }
@@ -80,6 +84,10 @@ namespace Furloader
             string result;
             using (WebResponse resp = POST(URI, postData))
             {
+                if(resp == null)
+                {
+                    return "";
+                }
 
                 refer = URL;
 
@@ -110,7 +118,7 @@ namespace Furloader
             byte[] buffer = new byte[4096];
             using (WebResponse resp = GET(URI))
             {
-                
+
                 using (Stream streamReader = resp.GetResponseStream())
                 {
                     using (MemoryStream stream = new MemoryStream())
@@ -129,11 +137,11 @@ namespace Furloader
             return result;
         }
 
-        
+
 
         private WebResponse POST(Uri URL, string postData)
-        {   
-            
+        {
+
             var request = (HttpWebRequest)WebRequest.Create(URL);
 
             var data = Encoding.UTF8.GetBytes(postData);
@@ -153,8 +161,8 @@ namespace Furloader
                 stream.Write(data, 0, data.Length);
             }
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            
-            if((int)response.StatusCode == 302)
+
+            if ((int)response.StatusCode == 302)
             {
                 // Get login cookies
                 string responseHeaderLocation = response.Headers["Location"];
@@ -164,7 +172,7 @@ namespace Furloader
                 {
                     loc = new Uri(responseHeaderLocation);
                 }
-                catch(UriFormatException)
+                catch (UriFormatException)
                 {
                     loc = new Uri(URL, responseHeaderLocation);
                 }
@@ -172,32 +180,40 @@ namespace Furloader
                 response = GET(loc);
 
             }
-                        
+
             return response;
         }
 
         private HttpWebResponse GET(Uri URL)
         {
-
+            HttpWebResponse resp = null;
+            try
+            {
                 var request = (HttpWebRequest)WebRequest.Create(URL);
                 request.UserAgent = useragent;
                 request.CookieContainer = cookiesContainer;
                 request.Referer = refer;
                 request.KeepAlive = true;
+                request.Timeout = 10000;
 
-               // var fi = new FileInfo(URL.AbsolutePath);
-               // var ext = fi.Extension;
+                // var fi = new FileInfo(URL.AbsolutePath);
+                // var ext = fi.Extension;
 
-               // if (!string.IsNullOrWhiteSpace(ext))
-               // {
-               //     request.Accept = "image/webp,image/*,*/*;q=0.8";
-               // }
+                // if (!string.IsNullOrWhiteSpace(ext))
+                // {
+                //     request.Accept = "image/webp,image/*,*/*;q=0.8";
+                // }
 
 
-                HttpWebResponse resp = (HttpWebResponse)request.GetResponse();
-                return resp;
+                resp = (HttpWebResponse)request.GetResponse();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return resp;
         }
-        
+
 
 
     }

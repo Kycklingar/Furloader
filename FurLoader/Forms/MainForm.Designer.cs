@@ -116,7 +116,7 @@
             this.textBox_politeWait.Name = "textBox_politeWait";
             this.textBox_politeWait.Size = new System.Drawing.Size(45, 20);
             this.textBox_politeWait.TabIndex = 5;
-            this.textBox_politeWait.Text = "1";
+            this.textBox_politeWait.Text = "2500";
             this.textBox_politeWait.TextChanged += new System.EventHandler(this.textBox_politeWait_TextChanged);
             // 
             // label_politeWait
@@ -125,9 +125,9 @@
             this.label_politeWait.AutoSize = true;
             this.label_politeWait.Location = new System.Drawing.Point(340, 30);
             this.label_politeWait.Name = "label_politeWait";
-            this.label_politeWait.Size = new System.Drawing.Size(46, 13);
+            this.label_politeWait.Size = new System.Drawing.Size(51, 13);
             this.label_politeWait.TabIndex = 7;
-            this.label_politeWait.Text = "Threads";
+            this.label_politeWait.Text = "Wait (ms)";
             // 
             // progressBar1
             // 
@@ -233,6 +233,8 @@
             // 
             this.checkBox_nice_guy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox_nice_guy.AutoSize = true;
+            this.checkBox_nice_guy.Checked = true;
+            this.checkBox_nice_guy.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_nice_guy.Location = new System.Drawing.Point(343, 72);
             this.checkBox_nice_guy.Name = "checkBox_nice_guy";
             this.checkBox_nice_guy.Size = new System.Drawing.Size(88, 17);
@@ -303,7 +305,7 @@
             this.button_refresh.UseVisualStyleBackColor = true;
             this.button_refresh.Click += new System.EventHandler(this.button_refresh_Click);
             // 
-            // Form1
+            // MainForm
             // 
             this.AcceptButton = this.button_go;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -334,7 +336,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button_go);
             this.MinimumSize = new System.Drawing.Size(447, 325);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "FurLoader";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);

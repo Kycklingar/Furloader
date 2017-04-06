@@ -658,13 +658,23 @@ namespace Furloader
             return false;
         }
 
-        public bool loginSite(string siteString, string username, string password)
+        public LoginData GetLoginData(string siteString)
+        {
+            Website site = getSiteFromString(siteString);
+            if(site != null)
+            {
+                return site.GetLoginData();
+            }
+            return new LoginData();
+        }
+
+        public bool loginSite(string siteString, string username, string password, string captcha = null)
         {
             Website site = getSiteFromString(siteString);
 
             if (site != null)
             {
-                return site.login(datahandler, username, password);
+                return site.login(datahandler, username, password, captcha);
             }
             return false;
         }
