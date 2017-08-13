@@ -31,7 +31,7 @@ namespace Furloader.Sites
                     return false;
                 }
 
-                datahandler.setLogin(Name, "", username, password);
+                datahandler.setLogin(Name, sid, username, "");
             }
             catch (Exception e)
             {
@@ -45,9 +45,9 @@ namespace Furloader.Sites
         public override bool checkLogin(loginCookies login)
         {
             WebHandler webHandler = new WebHandler();
-
-            string data = string.Format("username={0}&password={1}", login.username, login.password);
-            string url = baseUrl + "api_login.php";
+            
+            string data = string.Format("sid={0}", login.cookies);
+            string url = baseUrl + "api_submissions.php";
 
             string html = webHandler.getPage(url, data);
 
