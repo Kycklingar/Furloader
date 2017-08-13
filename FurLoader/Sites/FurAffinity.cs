@@ -106,7 +106,7 @@ namespace Furloader.Sites
             {
                 Uri uri = new Uri(FABase);
                 string cookie = webHandler.getCookies(uri);
-                datahandler.setLogin("furaffinity", cookie, username, password);
+                datahandler.setLogin("furaffinity", cookie, username, "");
                 return true;
             }
             return false;
