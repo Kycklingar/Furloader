@@ -37,6 +37,7 @@ namespace Furloader.loginPages
 
         private async void loginButton_Click(object sender, EventArgs e)
         {
+            loginButton.Enabled = false;
             try
             {
                 if (await worker.loginSiteAsync(Text, username_TxtBox.Text, password_TxtBox.Text, captcha_TxtBox.Text))
@@ -54,6 +55,7 @@ namespace Furloader.loginPages
             {
                 MessageBox.Show(this, "An error occured: " + ex.Message, ex.GetType().Name);
             }
+            loginButton.Enabled = true;
         }
     }
 }
