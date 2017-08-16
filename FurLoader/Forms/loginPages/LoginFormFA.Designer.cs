@@ -110,6 +110,7 @@
             this.Controls.Add(this.loginButton);
             this.Name = "LoginFormFA";
             this.Text = "LoginFormFA";
+            this.Load += new System.EventHandler(this.LoginFormFA_Load);
             ((System.ComponentModel.ISupportInitialize)(this.captcha_PicBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

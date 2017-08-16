@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace Furloader.Sites
 {
@@ -31,10 +32,10 @@ namespace Furloader.Sites
     public class Website
     {
         public virtual bool login(DataHandler datahandler) { return false; }
-        public virtual bool login(DataHandler datahandler, string username, string password, string captcha = null) { return false; }
-        public virtual LoginData GetLoginData() { return new LoginData(); }
+        public virtual async Task<bool> loginAsync(DataHandler datahandler, string username, string password, string captcha = null) { return false; }
+        public virtual async Task<LoginData> GetLoginDataAsync() { return new LoginData(); }
         public virtual string validateWatchlistUsername(string username) { return null; }
-        public virtual bool checkLogin(loginCookies login) { return false; }
+        public virtual async Task<bool> checkLogin(loginCookies login) { return false; }
         public virtual List<Submission> loadSubbmissionsFromUser(string user, bool scraps = false) { return null; }
         public virtual Submission getNextImage() { return new Submission(); }
         //public virtual void getImage(string pageSource) { }

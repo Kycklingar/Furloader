@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using Furloader.Sites;
+using System.Threading.Tasks;
 
 namespace Furloader
 {
@@ -658,35 +659,35 @@ namespace Furloader
             return false;
         }
 
-        public LoginData GetLoginData(string siteString)
+        public async Task<LoginData> GetLoginDataAsync(string siteString)
         {
             Website site = getSiteFromString(siteString);
             if(site != null)
             {
-                return site.GetLoginData();
+                return await site.GetLoginDataAsync();
             }
             return new LoginData();
         }
 
-        public bool loginSite(string siteString, string username, string password, string captcha = null)
+        public async Task<bool> loginSiteAsync(string siteString, string username, string password, string captcha = null)
         {
             Website site = getSiteFromString(siteString);
 
             if (site != null)
             {
-                return site.login(datahandler, username, password, captcha);
+                return await site.loginAsync(datahandler, username, password, captcha);
             }
             return false;
         }
 
-        public bool checkLogin(string siteString)
+        public async Task<bool> checkLogin(string siteString)
         {
             Website site = getSiteFromString(siteString);
             if (site != null)
             {
                 loginCookies login = datahandler.getLogin(site.Name);
 
-                return site.checkLogin(login);
+                return await site.checkLogin(login);
             }
             return false;
         }

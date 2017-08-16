@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Furloader.Sites
 {
@@ -66,7 +67,7 @@ namespace Furloader.Sites
             return subs;
         }
 
-        public override bool checkLogin(loginCookies login)
+        public override async Task<bool> checkLogin(loginCookies login)
         {
             if (login.username == "" || login.cookies == "")
             {
@@ -78,21 +79,21 @@ namespace Furloader.Sites
 
             userLoginName = login.username;
 
-            return isLoggedIn();
+            return await isLoggedInAsync();
         }
 
-        public override LoginData GetLoginData()
+        public override async Task<LoginData> GetLoginDataAsync()
         {
-            string html = webHandler.getPage(FALoginPage);
+            string html = await webHandler.getPageAsync(FALoginPage);
 
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(html);
             string captchaLink = doc.GetElementbyId("captcha_img").Attributes["src"].Value;
 
-            return new LoginData { Captcha = webHandler.getImage(FABase + captchaLink) };
+            return new LoginData { Captcha = await webHandler.getImageAsync(FABase + captchaLink) };
         }
 
-        public override bool login(DataHandler datahandler, string username, string password, string captcha)
+        public override async Task<bool> loginAsync(DataHandler datahandler, string username, string password, string captcha)
         {
             string postData = string.Format("action=login&name={0}&pass={1}&g-recaptcha-response=&use_old_captcha=1&captcha={2}&login={3}",
                 username,
@@ -100,9 +101,9 @@ namespace Furloader.Sites
                 captcha,
                 "Login to%C2%A0FurAffinity");
 
-            webHandler.getPage(FALoginPage + "?ref=https://furaffinity.net/", postData);
+            await webHandler.getPageAsync(FALoginPage + "?ref=https://furaffinity.net/", postData);
 
-            if (isLoggedIn())
+            if (await isLoggedInAsync())
             {
                 Uri uri = new Uri(FABase);
                 string cookie = webHandler.getCookies(uri);
@@ -488,10 +489,10 @@ namespace Furloader.Sites
 
         }
 
-        private bool isLoggedIn()
+        private async Task<bool> isLoggedInAsync()
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            string web = webHandler.getPage(FABase);
+            string web = await webHandler.getPageAsync(FABase);
             doc.LoadHtml(web);
             HtmlNode node = doc.DocumentNode.SelectSingleNode("//a[@href='/submit/']");
 

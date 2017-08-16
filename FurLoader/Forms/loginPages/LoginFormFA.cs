@@ -21,22 +21,39 @@ namespace Furloader.loginPages
             worker = worker_;
             InitializeComponent();
             Text = title;
-            Sites.LoginData data = worker.GetLoginData("furaffinity");
-            captcha_PicBox.Image = data.Captcha;
         }
 
-        private void loginButton_Click(object sender, EventArgs e)
-        {
-            if (worker.loginSite(Text, username_TxtBox.Text, password_TxtBox.Text, captcha_TxtBox.Text))
+        private async void LoginFormFA_Load(object sender, EventArgs e) {
+            try
             {
-                Success = true;
-                DialogResult = DialogResult.OK;
-                Close();
-                return;
+                Sites.LoginData data = await worker.GetLoginDataAsync("furaffinity");
+                captcha_PicBox.Image = data.Captcha;
             }
-            MessageBox.Show("Login Failed");
-            Sites.LoginData data = worker.GetLoginData("furaffinity");
-            captcha_PicBox.Image = data.Captcha;
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Could not load captcha: " + ex.Message, ex.GetType().Name);
+            }
+        }
+
+        private async void loginButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (await worker.loginSiteAsync(Text, username_TxtBox.Text, password_TxtBox.Text, captcha_TxtBox.Text))
+                {
+                    Success = true;
+                    DialogResult = DialogResult.OK;
+                    Close();
+                    return;
+                }
+                MessageBox.Show("Login Failed");
+                Sites.LoginData data = await worker.GetLoginDataAsync("furaffinity");
+                captcha_PicBox.Image = data.Captcha;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "An error occured: " + ex.Message, ex.GetType().Name);
+            }
         }
     }
 }
