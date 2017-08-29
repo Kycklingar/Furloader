@@ -14,16 +14,25 @@ namespace Furloader.loginPages
             Text = Title;
         }
 
-        private void loginButton_Click(object sender, EventArgs e)
+        private async void loginButton_Click(object sender, EventArgs e)
         {
-            if (worker.loginSite(Text, username_TxtBox.Text, password_TxtBox.Text))
+            loginButton.Enabled = false;
+            try
             {
-                Success = true;
-                DialogResult = DialogResult.OK;
-                Close();
-                return;
+                if (await worker.loginSiteAsync(Text, username_TxtBox.Text, password_TxtBox.Text))
+                {
+                    Success = true;
+                    DialogResult = DialogResult.OK;
+                    Close();
+                    return;
+                }
+                MessageBox.Show("Login Failed");
             }
-            MessageBox.Show("Login Failed");
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "An error occured: " + ex.Message, ex.GetType().Name);
+            }
+            loginButton.Enabled = true;
         }
     }
 }

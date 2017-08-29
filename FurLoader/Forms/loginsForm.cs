@@ -18,16 +18,22 @@ namespace Furloader
             checkLogin("inkbunny", pictureBox_IB);
         }
 
-        void checkLogin(string site, PictureBox PB)
+        async void checkLogin(string site, PictureBox PB)
         {
-            PB.Image = Properties.Resources.LoginStandby;
-            if (worker.checkLogin(site))
-            {
-                PB.Image = Properties.Resources.LoginOK;
+            try {
+                PB.Image = Properties.Resources.LoginStandby;
+                if (await worker.checkLogin(site))
+                {
+                    PB.Image = Properties.Resources.LoginOK;
+                }
+                else
+                {
+                    PB.Image = Properties.Resources.LoginFailed;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                PB.Image = Properties.Resources.LoginFailed;
+                MessageBox.Show(this, "An error occured: " + ex.Message, ex.GetType().Name);
             }
         }
 
