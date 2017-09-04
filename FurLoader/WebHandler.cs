@@ -3,6 +3,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace Furloader
 {
@@ -78,6 +79,29 @@ namespace Furloader
             return result;
         }
 
+        public async Task<string> getPageAsync(string URL)
+        {
+            Uri URI = new Uri(URL);
+            string result;
+            using (WebResponse resp = await GETAsync(URI))
+            {
+                if(resp == null)
+                {
+                    return "";
+                }
+                refer = URL;
+
+                using (var reader = new StreamReader(resp.GetResponseStream()))
+                {
+                    result = await reader.ReadToEndAsync();
+                }
+
+                result = WebUtility.HtmlDecode(result);
+
+            }
+            return result;
+        }
+
         public string getPage(string URL, string postData)
         {
             Uri URI = new Uri(URL);
@@ -100,6 +124,29 @@ namespace Furloader
             return result;
         }
 
+        public async Task<string> getPageAsync(string URL, string postData)
+        {
+            Uri URI = new Uri(URL);
+            string result;
+            using (WebResponse resp = await POSTAsync(URI, postData))
+            {
+                if(resp == null)
+                {
+                    return "";
+                }
+
+                refer = URL;
+                
+                using (var reader = new StreamReader(resp.GetResponseStream()))
+                {
+                    result = await reader.ReadToEndAsync();
+                }
+
+                result = WebUtility.HtmlDecode(result);
+            }
+            return result;
+        }
+
         public Image getImage(string URL)
         {
             Uri URI = new Uri(URL);
@@ -107,6 +154,22 @@ namespace Furloader
             using (WebResponse resp = GET(URI))
             {
                 image = Image.FromStream(resp.GetResponseStream());
+            }
+            return image;
+        }
+
+        public async Task<Image> getImageAsync(string URL)
+        {
+            Uri URI = new Uri(URL);
+            Image image;
+            using (WebResponse resp = await GETAsync(URI))
+            {
+                using (var stream = resp.GetResponseStream())
+                {
+                    DateTime dt = DateTime.Now;
+                    image = Image.FromStream(stream);
+                    Console.WriteLine(DateTime.Now - dt);
+                }
             }
             return image;
         }
@@ -184,6 +247,45 @@ namespace Furloader
             return response;
         }
 
+        private async Task<WebResponse> POSTAsync(Uri URL, string postData) {
+
+            var request = (HttpWebRequest)WebRequest.Create(URL);
+
+            var data = Encoding.UTF8.GetBytes(postData);
+
+            request.UserAgent = useragent;
+            request.CookieContainer = cookiesContainer;
+
+
+            request.Method = "POST";
+            request.AllowAutoRedirect = false;
+            request.Referer = refer;
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = data.Length;
+
+            using (var stream = await request.GetRequestStreamAsync()) {
+                await stream.WriteAsync(data, 0, data.Length);
+            }
+            HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync());
+
+            if ((int)response.StatusCode == 302) {
+                // Get login cookies
+                string responseHeaderLocation = response.Headers["Location"];
+                Uri loc;
+                // Handle relative vs absolute paths
+                try {
+                    loc = new Uri(responseHeaderLocation);
+                } catch (UriFormatException) {
+                    loc = new Uri(URL, responseHeaderLocation);
+                }
+
+                response = await GETAsync(loc);
+
+            }
+
+            return response;
+        }
+
         private HttpWebResponse GET(Uri URL)
         {
             HttpWebResponse resp = null;
@@ -206,6 +308,36 @@ namespace Furloader
 
 
                 resp = (HttpWebResponse)request.GetResponse();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return resp;
+        }
+
+        private async Task<HttpWebResponse> GETAsync(Uri URL)
+        {
+            HttpWebResponse resp = null;
+            try
+            {
+                var request = (HttpWebRequest)WebRequest.Create(URL);
+                request.UserAgent = useragent;
+                request.CookieContainer = cookiesContainer;
+                request.Referer = refer;
+                request.KeepAlive = true;
+                request.Timeout = 10000;
+
+                // var fi = new FileInfo(URL.AbsolutePath);
+                // var ext = fi.Extension;
+
+                // if (!string.IsNullOrWhiteSpace(ext))
+                // {
+                //     request.Accept = "image/webp,image/*,*/*;q=0.8";
+                // }
+
+
+                resp = (HttpWebResponse)(await request.GetResponseAsync());
             }
             catch (Exception e)
             {

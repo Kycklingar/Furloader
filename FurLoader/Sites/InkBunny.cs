@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Furloader.Sites
 {
@@ -16,12 +17,12 @@ namespace Furloader.Sites
 
         private string loggedinUsername;
 
-        public override bool login(DataHandler datahandler, string username, string password, string captcha = null)
+        public override async Task<bool> loginAsync(DataHandler datahandler, string username, string password, string captcha = null)
         {
             try
             {
                 WebHandler webHandler = new WebHandler();
-                string html = webHandler.getPage(baseUrl + "api_login.php", string.Format("username={0}&password={1}", username, password));
+                string html = await webHandler.getPageAsync(baseUrl + "api_login.php", string.Format("username={0}&password={1}", username, password));
 
                 dynamic json = JsonConvert.DeserializeObject(html);
                 sid = json.sid;
@@ -42,14 +43,14 @@ namespace Furloader.Sites
             return true;
         }
 
-        public override bool checkLogin(loginCookies login)
+        public override async Task<bool> checkLogin(loginCookies login)
         {
             WebHandler webHandler = new WebHandler();
             
             string data = string.Format("sid={0}", login.cookies);
             string url = baseUrl + "api_submissions.php";
 
-            string html = webHandler.getPage(url, data);
+            string html = await webHandler.getPageAsync(url, data);
 
             dynamic json = JsonConvert.DeserializeObject(html);
 
