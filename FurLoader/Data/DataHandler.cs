@@ -74,7 +74,7 @@ namespace Furloader
             int dbVersion = 0;
             if (isFirstLaunch())
             {
-                MessageBox.Show("This program stores usernames and passwords in plain text.\nUse on your own risk", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("This program stores usernames and passwords in plain text.\nUse on your own risk", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
