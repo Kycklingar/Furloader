@@ -239,6 +239,7 @@ namespace Furloader.Sites
                     Submission sub = new Submission();
 
                     sub.domain = domain;
+                    sub.site = (int)SITES.InkBunny;
                     sub.author = subJson.username;
                     sub.title = subJson.title;
                     sub.id = subJson.submission_id;
@@ -311,6 +312,7 @@ namespace Furloader.Sites
                 Submission sub = new Submission();
 
                 sub.domain = domain;
+                sub.site = (int)SITES.InkBunny;
                 sub.author = username;
                 sub.title = string.Format("{0}-{1}", title, iteration++);
                 sub.id = "fID" + subJson.file_id;

@@ -54,6 +54,9 @@
             this.button_refresh = new System.Windows.Forms.Button();
             this.toolTip_threads = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip_User = new System.Windows.Forms.ToolTip(this.components);
+            this.failButton = new System.Windows.Forms.Button();
+            this.failureLabel = new System.Windows.Forms.Label();
+            this.failCountLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_go
@@ -305,6 +308,35 @@
             this.button_refresh.UseVisualStyleBackColor = true;
             this.button_refresh.Click += new System.EventHandler(this.button_refresh_Click);
             // 
+            // failButton
+            // 
+            this.failButton.Enabled = false;
+            this.failButton.Location = new System.Drawing.Point(181, 173);
+            this.failButton.Name = "failButton";
+            this.failButton.Size = new System.Drawing.Size(75, 23);
+            this.failButton.TabIndex = 23;
+            this.failButton.Text = "Retry Failed";
+            this.failButton.UseVisualStyleBackColor = true;
+            this.failButton.Click += new System.EventHandler(this.failButton_Click);
+            // 
+            // failureLabel
+            // 
+            this.failureLabel.AutoSize = true;
+            this.failureLabel.Location = new System.Drawing.Point(12, 238);
+            this.failureLabel.Name = "failureLabel";
+            this.failureLabel.Size = new System.Drawing.Size(35, 13);
+            this.failureLabel.TabIndex = 24;
+            this.failureLabel.Text = "Failed";
+            // 
+            // failCountLabel
+            // 
+            this.failCountLabel.AutoSize = true;
+            this.failCountLabel.Location = new System.Drawing.Point(59, 238);
+            this.failCountLabel.Name = "failCountLabel";
+            this.failCountLabel.Size = new System.Drawing.Size(13, 13);
+            this.failCountLabel.TabIndex = 25;
+            this.failCountLabel.Text = "0";
+            // 
             // MainForm
             // 
             this.AcceptButton = this.button_go;
@@ -312,6 +344,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_stop;
             this.ClientSize = new System.Drawing.Size(431, 320);
+            this.Controls.Add(this.failCountLabel);
+            this.Controls.Add(this.failureLabel);
+            this.Controls.Add(this.failButton);
             this.Controls.Add(this.button_refresh);
             this.Controls.Add(this.comboBox_mode);
             this.Controls.Add(this.comboBox_site);
@@ -372,6 +407,9 @@
         private System.Windows.Forms.Button button_refresh;
         private System.Windows.Forms.ToolTip toolTip_threads;
         private System.Windows.Forms.ToolTip toolTip_User;
+        private System.Windows.Forms.Button failButton;
+        private System.Windows.Forms.Label failureLabel;
+        private System.Windows.Forms.Label failCountLabel;
     }
 }
 

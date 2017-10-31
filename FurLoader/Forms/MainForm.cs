@@ -23,6 +23,7 @@ namespace Furloader
         private int totalFiles = 0;
         private int newFiles = 0;
         private int remaining = 0;
+        private int failures = 0;
 
         private string waitText = "2500";
         private string threadsText = "1";
@@ -123,54 +124,74 @@ namespace Furloader
         {
             if (!isClosing)
             {
-                ProgressArg progress = (ProgressArg)e;
-
-                if (!progress.files)
+                if (e is ProgressFail)
                 {
-
                     if (InvokeRequired)
                     {
                         this.Invoke(new MethodInvoker(delegate
                         {
-                            totalFiles += progress.amount;
-                            remaining += progress.amount;
-
-
-                            button_stop.Enabled = true;
-                            progressBar1.Maximum = remaining;
-                            progressBar1.Value = 0;
-                            label_numFiles.Text = totalFiles.ToString();
-                            label_leftToDownload.Text = remaining.ToString();
+                            failures++;
+                            failCountLabel.Text = failures.ToString();
+                            if (failures > 0)
+                            {
+                                failButton.Enabled = true;
+                            }
                         }));
                     }
                 }
                 else
                 {
-                    if (InvokeRequired)
+                    ProgressArg progress = (ProgressArg)e;
+
+                    if (!progress.files)
                     {
-                        this.Invoke(new MethodInvoker(delegate
+
+                        if (InvokeRequired)
                         {
-                            progressBar1.Increment(1);
-                            numFiles++;
-                            remaining--;
-                            label_leftToDownload.Text = remaining.ToString();
-                            if (remaining <= 0)
+                            this.Invoke(new MethodInvoker(delegate
                             {
-                                progressBar1.Maximum = 0;
+                                totalFiles += progress.amount;
+                                remaining += progress.amount;
+
+
+                                button_stop.Enabled = true;
+                                progressBar1.Maximum = remaining;
                                 progressBar1.Value = 0;
-                                button_stop.Enabled = false;
-                            }
-
-                            label_filesDownloaded.Text = numFiles.ToString();
-
-                            if (progress.newFiles)
+                                label_numFiles.Text = totalFiles.ToString();
+                                label_leftToDownload.Text = remaining.ToString();
+                            }));
+                        }
+                    }
+                    else
+                    {
+                        if (InvokeRequired)
+                        {
+                            this.Invoke(new MethodInvoker(delegate
                             {
-                                newFiles++;
-                                label_newFilesDownloaded.Text = newFiles.ToString();
-                            }
-                        }));
+                                progressBar1.Increment(1);
+                                numFiles++;
+                                remaining--;
+                                label_leftToDownload.Text = remaining.ToString();
+                                if (remaining <= 0)
+                                {
+                                    progressBar1.Maximum = 0;
+                                    progressBar1.Value = 0;
+                                    button_stop.Enabled = false;
+                                }
+
+                                label_filesDownloaded.Text = numFiles.ToString();
+
+                                if (progress.newFiles)
+                                {
+                                    newFiles++;
+                                    label_newFilesDownloaded.Text = newFiles.ToString();
+                                }
+                            }));
+                        }
                     }
                 }
+
+                
             }
         }
 
@@ -314,6 +335,16 @@ namespace Furloader
         private void label3_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void failButton_Click(object sender, EventArgs e)
+        {
+            failures = 0;
+            failButton.Enabled = false;
+
+            Thread thread = new Thread(() => worker.retryFailures());
+            thread.IsBackground = true;
+            thread.Start();
         }
     }
 }

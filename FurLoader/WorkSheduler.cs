@@ -32,6 +32,11 @@ namespace Furloader
         public bool newFiles;
     }
 
+    public class ProgressFail : EventArgs
+    {
+        public bool fail = true;
+    }
+
     public struct Submission
     {
         public int site;
@@ -65,6 +70,8 @@ namespace Furloader
         private List<string> usersDownloading = new List<string>();
         private List<string> downloadList = new List<string>();
 
+        private Object fLock = new Object();
+        private List<Submission> failedDownloads = new List<Submission>();
 
         public DataHandler datahandler = new DataHandler();
 
@@ -251,6 +258,67 @@ namespace Furloader
             thread.Start();
         }
         */
+
+        public void retryFailures()
+        {
+            foreach (Submission sub in failedDownloads)
+            {
+                lock (fLock)
+                    failedDownloads.Remove(sub);
+
+                var site = getSiteFromInt(sub.site);
+                if (site == null)
+                {
+                    Console.WriteLine("Sub has no site", sub.id);
+                    continue;
+                }
+
+                lock (locker)
+                {
+                    if (isBeingDownloaded(sub.pageSource))
+                    {
+                        continue;
+                    }
+                    else if (datahandler.isPageSource(sub.pageSource))
+                    {
+                        onUpdateProgress(new ProgressArg(true, false));
+                        continue;
+                    }
+                    downloadList.Add(sub.pageSource);
+
+                }
+
+                while (true)
+                {
+                    lock (locker2)
+                    {
+                        if (!(pauseDownloads || threadCount >= maxThreads))
+                        {
+                            threadCount++;
+                            break;
+                        }
+                    }
+                    Thread.Sleep(10);
+                }
+
+                Thread.Sleep(politeWait);
+
+                if (stopDownloads)
+                {
+                    downloadList.Remove(sub.pageSource.ToString());
+                    threadCount--;
+                    break;
+                }
+
+                lock (locker)
+                {
+                    Thread thread = new Thread(() => downloadImage(sub, site, true));
+                    thread.IsBackground = true;
+                    thread.Start();
+                }
+
+            }
+        }
 
         public void getSubmissions(string user, string siteString, bool scraps)
         {
@@ -854,6 +922,10 @@ namespace Furloader
             catch (Exception e)
             {
                 Console.WriteLine(e + Environment.NewLine + sub.pageSource.ToString() + Environment.NewLine + sub.id);
+                lock (fLock)
+                    failedDownloads.Add(sub);
+                ProgressFail prf = new ProgressFail();
+                onUpdateProgress(prf);
             }
             lock (locker)
                 downloadList.Remove(sub.pageSource.ToString());

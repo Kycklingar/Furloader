@@ -227,6 +227,7 @@ namespace Furloader.Sites
                             Submission sub = new Submission();
 
                             sub.domain = "www.furaffinity.net";
+                            sub.site = (int)SITES.FurAffinity;
                             sub.id = sid;
                             sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
@@ -279,6 +280,7 @@ namespace Furloader.Sites
                                 Submission sub = new Submission();
 
                                 sub.domain = "www.furaffinity.net";
+                                sub.site = (int)SITES.FurAffinity;
                                 sub.id = sid;
                                 sub.pageSource = string.Format("FA_{0}", sid);
                                 sub.thumbSource = "http:" + thumb;
@@ -328,6 +330,7 @@ namespace Furloader.Sites
                             Submission sub = new Submission();
 
                             sub.domain = "www.furaffinity.net";
+                            sub.site = (int)SITES.FurAffinity;
                             sub.id = sid;
                             //sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
                             sub.pageSource = string.Format("FA_{0}", sid);
