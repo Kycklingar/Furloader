@@ -261,7 +261,8 @@ namespace Furloader
 
         public void retryFailures()
         {
-            foreach (Submission sub in failedDownloads)
+            var oldFailureList = new List<Submission>(failedDownloads);
+            foreach (Submission sub in oldFailureList)
             {
                 lock (fLock)
                     failedDownloads.Remove(sub);
@@ -797,7 +798,7 @@ namespace Furloader
 
         private void downloadSubmissions(List<Submission> submissions, Website site, bool scrap)
         {
-            foreach (Submission sub in submissions)
+                foreach (Submission sub in submissions)
             {
                 lock (locker)
                 {
@@ -929,6 +930,7 @@ namespace Furloader
             }
             lock (locker)
                 downloadList.Remove(sub.pageSource.ToString());
+
             ProgressArg prog = new ProgressArg(true, true);
             onUpdateProgress(prog);
             threadCount--;
