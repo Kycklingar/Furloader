@@ -12,7 +12,7 @@ namespace Furloader
     public delegate void changedEventHandler(object sender, EventArgs e);
     public delegate void updateProgress(object sender, EventArgs e);
 
-    enum SITES { FurAffinity, InkBunny }
+    public enum SITES { FurAffinity, InkBunny }
 
     public class ProgressArg : EventArgs
     {
@@ -39,7 +39,7 @@ namespace Furloader
 
     public struct Submission
     {
-        public int site;
+        public SITES site;
         public string domain;
         public string id;
         public string title;
@@ -78,7 +78,7 @@ namespace Furloader
 
         public WorkSheduler()
         {
-            FA.Changed += new changedEventHandler(ListChanged);
+            //FA.Changed += new changedEventHandler(ListChanged);
             datahandler.bootDB();
         }
 
@@ -186,23 +186,23 @@ namespace Furloader
             }
         }
 
-        private void ListChanged(object sender, EventArgs e)
-        {
-            /*baseLogin obj = (baseLogin)sender;
-            while(true)
-            {
-                Submission sub = obj.getNextImage();
-                if(sub.title == null)
-                {
-                    break;
-                }
+        //private void ListChanged(object sender, EventArgs e)
+        //{
+        //    /*baseLogin obj = (baseLogin)sender;
+        //    while(true)
+        //    {
+        //        Submission sub = obj.getNextImage();
+        //        if(sub.title == null)
+        //        {
+        //            break;
+        //        }
 
-                submissions.Add(sub);
-                
-                onUpdateGallery(sender, EventArgs.Empty);
-            }*/
-            onUpdateGallery(sender, EventArgs.Empty);
-        }
+        //        submissions.Add(sub);
+
+        //        onUpdateGallery(sender, EventArgs.Empty);
+        //    }*/
+        //    onUpdateGallery(sender, EventArgs.Empty);
+        //}
 
         public void startSubscriptions(int pageLimit, string siteString, bool scraps)
         {
@@ -241,7 +241,7 @@ namespace Furloader
             ProgressArg e = new ProgressArg(submissions.Count());
             onUpdateProgress(e);
 
-            downloadSubmissions(submissions, site, scraps);
+            downloadSubmissions(submissions, scraps);
 
             Console.WriteLine(string.Format("Subscription on {0} has finished.", site.Name));
             usersDownloading.Remove(ID);
@@ -267,12 +267,12 @@ namespace Furloader
                 lock (fLock)
                     failedDownloads.Remove(sub);
 
-                var site = getSiteFromInt(sub.site);
-                if (site == null)
-                {
-                    Console.WriteLine("Sub has no site", sub.id);
-                    continue;
-                }
+                //var site = getSite(sub.site);
+                //if (site == null)
+                //{
+                //    Console.WriteLine("Sub has no site", sub.id);
+                //    continue;
+                //}
 
                 lock (locker)
                 {
@@ -313,7 +313,7 @@ namespace Furloader
 
                 lock (locker)
                 {
-                    Thread thread = new Thread(() => downloadImage(sub, site, true));
+                    Thread thread = new Thread(() => downloadImage(sub, true));
                     thread.IsBackground = true;
                     thread.Start();
                 }
@@ -335,20 +335,6 @@ namespace Furloader
             {
                 Console.WriteLine(user + " is already downloading.");
             }
-            //if (scraps)
-            //{
-            //    if (!usersDownloading.Contains(user + " scraps"))
-            //    {
-            //        Thread thread = new Thread(() => getSubs(user, site, scraps));
-            //        thread.IsBackground = true;
-            //        thread.Start();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine(user + " scraps is already downloading.");
-            //    }
-            //}
-
         }
 
         private void searchDownload(string searchString, Website site, bool scraps)
@@ -371,7 +357,7 @@ namespace Furloader
             ProgressArg e = new ProgressArg(subList.Count());
             onUpdateProgress(e);
 
-            downloadSubmissions(subList, site, scraps);
+            downloadSubmissions(subList, scraps);
 
             Console.WriteLine(string.Format("Search for {0} on {1} has finished downloading.", searchString, site.Name));
             usersDownloading.Remove(ID);
@@ -731,7 +717,7 @@ namespace Furloader
         public async Task<LoginData> GetLoginDataAsync(string siteString)
         {
             Website site = getSiteFromString(siteString);
-            if(site != null)
+            if (site != null)
             {
                 return await site.GetLoginDataAsync();
             }
@@ -790,15 +776,15 @@ namespace Furloader
             ProgressArg e = new ProgressArg(submissions.Count());
             onUpdateProgress(e);
 
-            downloadSubmissions(submissions, site, scraps);
+            downloadSubmissions(submissions, scraps);
 
             Console.WriteLine(userThreadID + " has finished downloading.");
             usersDownloading.Remove(userThreadID);
         }
 
-        private void downloadSubmissions(List<Submission> submissions, Website site, bool scrap)
+        private void downloadSubmissions(List<Submission> submissions, bool scrap)
         {
-                foreach (Submission sub in submissions)
+            foreach (Submission sub in submissions)
             {
                 lock (locker)
                 {
@@ -839,7 +825,7 @@ namespace Furloader
 
                 lock (locker)
                 {
-                    Thread thread = new Thread(() => downloadImage(sub, site, scrap));
+                    Thread thread = new Thread(() => downloadImage(sub, scrap));
                     thread.IsBackground = true;
                     thread.Start();
                 }
@@ -890,6 +876,18 @@ namespace Furloader
             return site;
         }
 
+        private Website getSite(SITES site)
+        {
+            switch (site)
+            {
+                case SITES.FurAffinity:
+                    return FA;
+                case SITES.InkBunny:
+                    return IB;
+            }
+            return null;
+        }
+
         private int getSiteIntFromString(string site)
         {
             string ssite = "";
@@ -905,11 +903,18 @@ namespace Furloader
             }
         }
 
-        private bool downloadImage(Submission sub, Website site, bool scraps = false)
+        private bool downloadImage(Submission sub, bool scraps = false)
         {
             bool status = false;
             try
             {
+                var site = getSite(sub.site);
+                if (site == null)
+                {
+                    Console.WriteLine("Site is null", sub);
+                    return false;
+                }
+
                 sub = site.getSubInfo(sub);
 
                 if (!sub.scrap || (sub.scrap && scraps))
@@ -928,14 +933,17 @@ namespace Furloader
                 ProgressFail prf = new ProgressFail();
                 onUpdateProgress(prf);
             }
-            lock (locker)
-                downloadList.Remove(sub.pageSource.ToString());
+            finally
+            {
+                lock (locker)
+                    downloadList.Remove(sub.pageSource.ToString());
 
-            ProgressArg prog = new ProgressArg(true, true);
-            onUpdateProgress(prog);
-            threadCount--;
+                ProgressArg prog = new ProgressArg(true, true);
+                onUpdateProgress(prog);
+                threadCount--;
+            }
+
             return status;
         }
-
     }
 }

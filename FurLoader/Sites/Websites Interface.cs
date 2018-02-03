@@ -6,17 +6,6 @@ using System.Threading.Tasks;
 namespace Furloader.Sites
 {
 
-    public struct Subs
-    {
-        public Uri thumbnail;
-        public Uri fileSrc;
-        public int id;
-        public string title;
-        //public string description;
-        public string author;
-        //public List<string> tags;
-    }
-
     public struct loginCookies
     {
         public string username;
@@ -40,8 +29,8 @@ namespace Furloader.Sites
         public virtual Submission getNextImage() { return new Submission(); }
         //public virtual void getImage(string pageSource) { }
         public virtual byte[] getImage(string fileSource) { return null; }
-        public virtual List<Subs> getThumbsList() { return null; }
-        public virtual event changedEventHandler Changed;
+        //public virtual List<Subs> getThumbsList() { return null; }
+        //public virtual event changedEventHandler Changed;
         public virtual string getCookies() { return null; }
         public virtual Submission getSubInfo(Submission sub) { return new Submission(); }
         public virtual List<String> getWatchList(string user) { return null; }

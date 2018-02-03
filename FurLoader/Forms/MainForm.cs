@@ -67,11 +67,11 @@ namespace Furloader
                 return;
             }
 
-            switch((string)comboBox_mode.SelectedItem)
+            switch ((string)comboBox_mode.SelectedItem)
             {
                 case "Search":
                     string searchString = textBox1.Text;
-                    if(searchString == "" || searchString.Replace(" ", "") == "")
+                    if (searchString == "" || searchString.Replace(" ", "") == "")
                     {
                         toolTip_User.Show("Query cannot be empty", textBox1, 3000);
                         return;
@@ -84,7 +84,7 @@ namespace Furloader
                     worker.startSubscriptions(pages, (string)comboBox_site.SelectedItem, checkBox_scraps.Checked);
                     break;
                 case "Gallery":
-                    if(textBox1.Text == "" || textBox1.Text.Replace(" ", "") == "")
+                    if (textBox1.Text == "" || textBox1.Text.Replace(" ", "") == "")
                     {
                         toolTip_User.Show("User can't be empty", textBox1, 3000);
                         return;
@@ -102,7 +102,6 @@ namespace Furloader
 
         }
 
-        // Is there a better way? Let me know :)
         private int getModeFromString(string item)
         {
             switch (item)
@@ -191,7 +190,7 @@ namespace Furloader
                     }
                 }
 
-                
+
             }
         }
 
@@ -217,7 +216,7 @@ namespace Furloader
 
         private void textBox_politeWait_TextChanged(object sender, EventArgs e)
         {
-            if(checkBox_nice_guy.Checked)
+            if (checkBox_nice_guy.Checked)
             {
                 waitText = textBox_politeWait.Text;
             }
@@ -298,7 +297,7 @@ namespace Furloader
         {
             textBox1.Enabled = true;
             //textBox1.Text = "";
-            switch((string)comboBox_mode.SelectedItem)
+            switch ((string)comboBox_mode.SelectedItem)
             {
                 case "Subscription":
                     label1.Text = "Pages";
@@ -339,7 +338,10 @@ namespace Furloader
 
         private void failButton_Click(object sender, EventArgs e)
         {
+            remaining += failures;
+            label_leftToDownload.Text = remaining.ToString();
             failures = 0;
+            failCountLabel.Text = failures.ToString();
             failButton.Enabled = false;
 
             Thread thread = new Thread(() => worker.retryFailures());

@@ -88,41 +88,6 @@ namespace Furloader.Sites
             string data = string.Format("submissions_per_page=100&get_rid=yes&unread_submissions=yes&sid={0}", sid);
 
             return scanWithRid(url, data, pagelimit);
-
-            ////WebHandler webHandler = new WebHandler();
-
-            ////List<Submission> subs = new List<Submission>();
-
-            ////string html = webHandler.getPage(url, data);
-
-            ////dynamic json = JsonConvert.DeserializeObject(html);
-
-            ////if (jsonError(json))
-            ////    return null;
-
-            ////string rid = json.rid;
-
-            ////int currentPage = 1;
-            ////int pages = json.pages_count;
-
-            ////while(pages > currentPage && currentPage <= pagelimit)
-            ////{
-            ////    if(currentPage > 1)
-            ////    {
-            ////        data = string.Format("submissions_per_page=100&rid={0}&sid={1}&page={2}", rid, sid, currentPage);
-            ////        html = webHandler.getPage(url, data);
-            ////        json = JsonConvert.DeserializeObject(html);
-
-            ////        if (jsonError(json))
-            ////            return null;
-            ////    }
-
-            ////    subs.AddRange(parseSubmissions(json));
-
-            ////    currentPage++;
-            ////}
-
-            ////return subs;
         }
 
         public override List<Submission> getSearchSubs(string searchString)
@@ -239,7 +204,7 @@ namespace Furloader.Sites
                     Submission sub = new Submission();
 
                     sub.domain = domain;
-                    sub.site = (int)SITES.InkBunny;
+                    sub.site = SITES.InkBunny;
                     sub.author = subJson.username;
                     sub.title = subJson.title;
                     sub.id = subJson.submission_id;
@@ -312,7 +277,7 @@ namespace Furloader.Sites
                 Submission sub = new Submission();
 
                 sub.domain = domain;
-                sub.site = (int)SITES.InkBunny;
+                sub.site = SITES.InkBunny;
                 sub.author = username;
                 sub.title = string.Format("{0}-{1}", title, iteration++);
                 sub.id = "fID" + subJson.file_id;

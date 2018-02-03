@@ -15,23 +15,26 @@ namespace Furloader.Sites
         private const string FALoginPage = "https://www.furaffinity.net/login/";
         private const string FACaptcha = "https://furaffinity.net/captcha.jpg";
 
-        private int pos = 0;
         private string userLoginName;
-
-        //List<String> thumbsList;
-        List<Subs> subs = new List<Subs>();
 
         private WebHandler webHandler = new WebHandler();
 
-        public override event changedEventHandler Changed;
 
-        protected virtual void onChanged(EventArgs e)
-        {
-            if (Changed != null)
-            {
-                Changed(this, e);
-            }
-        }
+        //private int pos = 0;
+
+        //List<String> thumbsList;
+        //List<Subs> subs = new List<Subs>();
+
+
+        //public override event changedEventHandler Changed;
+
+        //protected virtual void onChanged(EventArgs e)
+        //{
+        //    if (Changed != null)
+        //    {
+        //        Changed(this, e);
+        //    }
+        //}
 
         public override string getCookies()
         {
@@ -40,32 +43,32 @@ namespace Furloader.Sites
             return cookies;
         }
 
-        public override Submission getNextImage()
-        {
+        //public override Submission getNextImage()
+        //{
 
-            if (pos >= subs.Count())
-            {
-                return new Submission();
-            }
-            int i = pos;
-            pos++;
+        //    if (pos >= subs.Count())
+        //    {
+        //        return new Submission();
+        //    }
+        //    int i = pos;
+        //    pos++;
 
-            string uri = subs[i].thumbnail.ToString();
-            Image image = webHandler.getImage(uri);
+        //    string uri = subs[i].thumbnail.ToString();
+        //    Image image = webHandler.getImage(uri);
 
-            Submission sub = new Submission();
-            sub.thumbnail = image;
-            sub.title = subs[i].title;
-            string str = string.Format("FA_{0}", subs[i].id);
-            sub.pageSource = str;
+        //    Submission sub = new Submission();
+        //    sub.thumbnail = image;
+        //    sub.title = subs[i].title;
+        //    string str = string.Format("FA_{0}", subs[i].id);
+        //    sub.pageSource = str;
 
-            return sub;
-        }
+        //    return sub;
+        //}
 
-        public override List<Subs> getThumbsList()
-        {
-            return subs;
-        }
+        //public override List<Subs> getThumbsList()
+        //{
+        //    return subs;
+        //}
 
         public override async Task<bool> checkLogin(loginCookies login)
         {
@@ -227,7 +230,7 @@ namespace Furloader.Sites
                             Submission sub = new Submission();
 
                             sub.domain = "www.furaffinity.net";
-                            sub.site = (int)SITES.FurAffinity;
+                            sub.site = SITES.FurAffinity;
                             sub.id = sid;
                             sub.pageSource = string.Format("FA_{0}", sid);
                             sub.thumbSource = "http:" + thumb;
@@ -280,7 +283,7 @@ namespace Furloader.Sites
                                 Submission sub = new Submission();
 
                                 sub.domain = "www.furaffinity.net";
-                                sub.site = (int)SITES.FurAffinity;
+                                sub.site = SITES.FurAffinity;
                                 sub.id = sid;
                                 sub.pageSource = string.Format("FA_{0}", sid);
                                 sub.thumbSource = "http:" + thumb;
@@ -330,7 +333,7 @@ namespace Furloader.Sites
                             Submission sub = new Submission();
 
                             sub.domain = "www.furaffinity.net";
-                            sub.site = (int)SITES.FurAffinity;
+                            sub.site = SITES.FurAffinity;
                             sub.id = sid;
                             //sub.pageSource = string.Format("{0}view/{1}", FABase, sid);
                             sub.pageSource = string.Format("FA_{0}", sid);
@@ -361,28 +364,28 @@ namespace Furloader.Sites
             return subList;
         }
 
-        private Subs getSubInfo(string pageSource)
-        {
-            Subs sub = new Subs();
-            try
-            {
-                string subHtml = webHandler.getPage(sourceFromId(pageSource));
-                HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                doc.LoadHtml(subHtml);
-                //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
+        //private Subs getSubInfo(string pageSource)
+        //{
+        //    Subs sub = new Subs();
+        //    try
+        //    {
+        //        string subHtml = webHandler.getPage(sourceFromId(pageSource));
+        //        HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+        //        doc.LoadHtml(subHtml);
+        //        //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
 
-                sub.author = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/a").InnerText;
-                //string url = "http:" + doc.DocumentNode.SelectSingleNode("//img[@id='submissionImg']").GetAttributeValue("src", null);
-                string url = "http:" + doc.DocumentNode.SelectSingleNode("//div[@class='alt1 actions aligncenter']/b[2]/a").GetAttributeValue("href", null);
-                Uri uri = new Uri(url);
-                sub.fileSrc = uri;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return sub;
-        }
+        //        sub.author = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/a").InnerText;
+        //        //string url = "http:" + doc.DocumentNode.SelectSingleNode("//img[@id='submissionImg']").GetAttributeValue("src", null);
+        //        string url = "http:" + doc.DocumentNode.SelectSingleNode("//div[@class='alt1 actions aligncenter']/b[2]/a").GetAttributeValue("href", null);
+        //        Uri uri = new Uri(url);
+        //        sub.fileSrc = uri;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //    }
+        //    return sub;
+        //}
 
         private string sourceFromId(string pageSource)
         {
