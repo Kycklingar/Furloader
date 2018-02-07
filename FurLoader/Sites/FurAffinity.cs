@@ -263,7 +263,7 @@ namespace Furloader.Sites
                 string url = baseUrl + pageN;
 
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-                string page = webHandler.getPage(url);
+                string page = webHandler.getPage(url, false);
 
                 doc.LoadHtml(page);
 
@@ -314,7 +314,7 @@ namespace Furloader.Sites
 
             for (int i = 0; i < pageLimit; i++)
             {
-                string html = webHandler.getPage(nextUrl);
+                string html = webHandler.getPage(nextUrl, false);
                 HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(html);
 
@@ -395,7 +395,7 @@ namespace Furloader.Sites
         public override Submission getSubInfo(Submission sub)
         {
 
-            string subHtml = webHandler.getPage(sourceFromId(sub.pageSource));
+            string subHtml = webHandler.getPage(sourceFromId(sub.pageSource), false);
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(subHtml);
             //sub.title = doc.DocumentNode.SelectSingleNode("//td[@class='cat']/b").InnerText;
@@ -462,7 +462,7 @@ namespace Furloader.Sites
                 while (!finished)
                 {
 
-                    string page = webHandler.getPage(watchlistUrl + pageN);
+                    string page = webHandler.getPage(watchlistUrl + pageN, false);
 
                     HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
                     doc.LoadHtml(page);
